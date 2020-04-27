@@ -1,0 +1,18 @@
+﻿<Window x:Class="VisualTester.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       Title="Function parser" Height="367" Width="258">
+    <Grid>
+        <TextBox Height="23" HorizontalAlignment="Center" Margin="12,29,54,0" Name="textBoxInput" VerticalAlignment="Top" Width="170" TabIndex="1" />
+        <ListBox Height="93" HorizontalAlignment="Center" Margin="12,84,12,0" Name="listBoxTokens" VerticalAlignment="Top" Width="212" />
+        <Label Content="Tokens:" Height="28" HorizontalAlignment="Left" Margin="12,58,0,0" Name="labelTokens" VerticalAlignment="Top" />
+        <Label Content="Function:" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" Name="labelInput" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Center" Margin="0,213,0,0" Name="textBoxReversePolishNotation" VerticalAlignment="Top" Width="212" IsReadOnly="True" />
+        <Label Content="Reverse polish notation:" Height="28" HorizontalAlignment="Left" Margin="12,187,0,0" Name="labelRPN" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Center" Margin="0,274,0,0" Name="textBoxResult" VerticalAlignment="Top" Width="212" IsReadOnly="True"  />
+        <Label Content="Result of expression:" Height="28" HorizontalAlignment="Left" Margin="12,248,0,0" Name="labelResult" VerticalAlignment="Top" />
+        <Button Content="Do it!" Height="23" HorizontalAlignment="Center" Margin="0,303,0,0" Name="buttonCalculateExpr" VerticalAlignment="Top" Width="127" Click="buttonCalculateExpr_Click" TabIndex="3" />
+        <Label Content="Variable:" Height="28" HorizontalAlignment="Left" Margin="185,3,0,0" Name="labelVar" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Center" Margin="190,29,12,0" Name="textBoxVar" VerticalAlignment="Top" Width="34" TabIndex="2"/>
+    </Grid>
+</Window>
