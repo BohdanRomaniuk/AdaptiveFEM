@@ -4,8 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AdaptiveFEM"
+        xmlns:converters="clr-namespace:AdaptiveFEM.Converters"
         mc:Ignorable="d"
         Title="Адаптивний метод скінченних елементів" Height="600" Width="800">
+    <Window.Resources>
+        <converters:ListItemIdConverter x:Key="ListItemIdConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -84,7 +88,7 @@
                 <Grid>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="0.2*"></ColumnDefinition>
+                            <ColumnDefinition Width="0.1*"></ColumnDefinition>
                             <ColumnDefinition Width="0.4*"></ColumnDefinition>
                             <ColumnDefinition Width="0.4*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
@@ -92,7 +96,7 @@
                         <Border Grid.Column="1" Name="width2"></Border>
                         <Border Grid.Column="2" Name="width3"></Border>
                     </Grid>
-                    <ListView x:Name="nums" HorizontalAlignment="Left" Margin="3" ItemsSource="{Binding Path=Nums, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="trimmed">
+                    <ListView x:Name="nums" HorizontalAlignment="Left" Margin="3" ItemsSource="{Binding Path=NumResults, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="trimmed">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="Height" Value="18" />
@@ -106,16 +110,16 @@
                         </ListView.Resources>
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="#" Width="{Binding ElementName=width1, Path=ActualWidth}" DisplayMemberBinding="{Binding Name}" />
-                                <GridViewColumn Header="x" Width="{Binding ElementName=width2, Path=ActualWidth}" DisplayMemberBinding="{Binding Name}" />
-                                <GridViewColumn Header="u(x)" Width="{Binding ElementName=width3, Path=ActualWidth}" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Header="#" Width="{Binding ElementName=width1, Path=ActualWidth}" DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}} , Converter={StaticResource ListItemIdConverter}}" />
+                                <GridViewColumn Header="x" Width="{Binding ElementName=width2, Path=ActualWidth}" DisplayMemberBinding="{Binding X}" />
+                                <GridViewColumn Header="u(x)" Width="{Binding ElementName=width3, Path=ActualWidth}" DisplayMemberBinding="{Binding Ux}" />
                             </GridView>
                         </ListView.View>
                     </ListView>
                 </Grid>
             </GroupBox>
             <GroupBox Header="Графік" Grid.Column="1" Margin="3,0,3,3">
-                Графік
+                
             </GroupBox>
         </Grid>
     </Grid>

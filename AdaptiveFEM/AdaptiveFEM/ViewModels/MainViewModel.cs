@@ -2,7 +2,9 @@
 using AdaptiveFEM.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 using System.Windows.Input;
 
@@ -137,10 +139,12 @@ namespace AdaptiveFEM.ViewModels
 
         #endregion
 
+        public ObservableCollection<NumericalResultItem> NumResults { get; set; }
         public ICommand SolveCommand { get; private set; }
 
         public MainViewModel()
         {
+            NumResults = new ObservableCollection<NumericalResultItem>();
             SolveCommand = new Command(Solve);
             Mu = "1";
             Beta = "100";
@@ -158,6 +162,7 @@ namespace AdaptiveFEM.ViewModels
 
         private void Solve(object parameter)
         {
+            NumResults.Clear();
             var mu = new Function(Mu);
             var beta = new Function(Beta);
             var sigma = new Function(Sigma);
@@ -165,6 +170,16 @@ namespace AdaptiveFEM.ViewModels
 
             var solver = new AdaptiveFEM_H(mu, beta, sigma, f, A, B, Alpha, Gamma, Ua, Ub, Error, N);
             solver.Run();
+            ShowTable(solver.Iterations.LastOrDefault());
+        }
+
+        private void ShowTable(IterationData data)
+        {
+            for (int i = 0; i < data.Elements.Count; ++i)
+            {
+                NumResults.Add(new NumericalResultItem(data.Elements[i].Begin, data.Solution[i]));
+            }
+            NumResults.Add(new NumericalResultItem(data.Elements[data.Elements.Count - 1].End, data.Solution[data.Elements.Count]));
         }
     }
 }
