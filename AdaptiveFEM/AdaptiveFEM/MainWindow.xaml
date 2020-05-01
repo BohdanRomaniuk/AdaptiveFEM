@@ -5,8 +5,118 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AdaptiveFEM"
         mc:Ignorable="d"
-        Title="Адаптивний метод скінченних елементів" Height="450" Width="800">
+        Title="Адаптивний метод скінченних елементів" Height="600" Width="800">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="Вхідні дані" Margin="3">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="μ(x)="/>
+                    <Label Content="β(x)=" Grid.Row="1"/>
+                    <Label Content="σ(x)=" Grid.Row="2"/>
+                    <Label Content="f(x)=" Grid.Row="3"/>
+                    <TextBox Text="{Binding Mu, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="3"/>
+                    <TextBox Text="{Binding Beta, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="1" Margin="3"/>
+                    <TextBox Text="{Binding Sigma, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="2" Margin="3"/>
+                    <TextBox Text="{Binding F, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="3" Margin="3"/>
 
+                    <Label Content="a=" Grid.Column="2" />
+                    <Label Content="b=" Grid.Row="1" Grid.Column="2" />
+                    <Label Content="n=" Grid.Row="2" Grid.Column="2" />
+                    <Label Content="α=" Grid.Row="3" Grid.Column="2" />
+                    <TextBox Text="{Binding A, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Margin="3"/>
+                    <TextBox Text="{Binding B, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Grid.Row="1" Margin="3"/>
+                    <TextBox Text="{Binding N, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Grid.Row="2" Margin="3"/>
+                    <TextBox Text="{Binding Alpha, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Grid.Row="3" Margin="3"/>
+
+                    <Label Content="ɣ=" Grid.Column="4" />
+                    <Label Content="η=" Grid.Row="1" Grid.Column="4" />
+                    <Label Content="ua=" Grid.Row="2" Grid.Column="4" />
+                    <Label Content="ub=" Grid.Row="3" Grid.Column="4" />
+                    <TextBox Text="{Binding Gamma, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Margin="3"/>
+                    <TextBox Text="{Binding Error, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Grid.Row="1" Margin="3"/>
+                    <TextBox Text="{Binding Ua, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Grid.Row="2" Margin="3"/>
+                    <TextBox Text="{Binding Ub, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Grid.Row="3" Margin="3"/>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Дії та очікуваний результат" Grid.Column="1" Margin="3">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Button Content="Обчислити" Command="{Binding SolveCommand}" Margin="3" />
+                    <Label Content="Очікуваний результат:" Grid.Row="1" />
+                    <TextBox Text="" Grid.Row="2" Margin="3"/>
+                    <Button Content="Очікуваний графік" Grid.Row="3" Margin="3"/>
+                </Grid>
+            </GroupBox>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="Значення" Margin="3,0,3,3">
+                <Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.2*"></ColumnDefinition>
+                            <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                            <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Name="width1"></Border>
+                        <Border Grid.Column="1" Name="width2"></Border>
+                        <Border Grid.Column="2" Name="width3"></Border>
+                    </Grid>
+                    <ListView x:Name="nums" HorizontalAlignment="Left" Margin="3" ItemsSource="{Binding Path=Nums, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="trimmed">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Height" Value="18" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text }" />
+                            </Style>
+                        </ListView.Resources>
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="#" Width="{Binding ElementName=width1, Path=ActualWidth}" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Header="x" Width="{Binding ElementName=width2, Path=ActualWidth}" DisplayMemberBinding="{Binding Name}" />
+                                <GridViewColumn Header="u(x)" Width="{Binding ElementName=width3, Path=ActualWidth}" DisplayMemberBinding="{Binding Name}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Графік" Grid.Column="1" Margin="3,0,3,3">
+                Графік
+            </GroupBox>
+        </Grid>
     </Grid>
 </Window>

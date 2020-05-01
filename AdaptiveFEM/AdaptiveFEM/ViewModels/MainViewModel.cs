@@ -1,4 +1,5 @@
-﻿using AdaptiveFEM.Services;
+﻿using AdaptiveFEM.Models;
+using AdaptiveFEM.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -141,11 +142,29 @@ namespace AdaptiveFEM.ViewModels
         public MainViewModel()
         {
             SolveCommand = new Command(Solve);
+            Mu = "1";
+            Beta = "100";
+            Sigma = "0";
+            F = "100";
+            A = 0;
+            B = 1;
+            N = 4;
+            Alpha = 100000;
+            Gamma = 100000;
+            Error = 10;
+            Ua = 0;
+            Ub = 0;
         }
 
         private void Solve(object parameter)
         {
+            var mu = new Function(Mu);
+            var beta = new Function(Beta);
+            var sigma = new Function(Sigma);
+            var f = new Function(F);
 
+            var solver = new AdaptiveFEM_H(mu, beta, sigma, f, A, B, Alpha, Gamma, Ua, Ub, Error, N);
+            solver.Run();
         }
     }
 }
