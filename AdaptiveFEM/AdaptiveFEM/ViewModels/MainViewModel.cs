@@ -1,5 +1,7 @@
 ﻿using AdaptiveFEM.Models;
 using AdaptiveFEM.Services;
+using LiveCharts;
+using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,6 +9,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace AdaptiveFEM.ViewModels
 {
@@ -142,9 +145,15 @@ namespace AdaptiveFEM.ViewModels
         public ObservableCollection<NumericalResultItem> NumResults { get; set; }
         public ICommand SolveCommand { get; private set; }
 
+
+        public SeriesCollection SeriesCollection { get; set; }
+        public string[] Labels { get; set; }
+        public Func<double, string> YFormatter { get; set; }
+
         public MainViewModel()
         {
             NumResults = new ObservableCollection<NumericalResultItem>();
+            SeriesCollection = new SeriesCollection();
             SolveCommand = new Command(Solve);
             Mu = "1";
             Beta = "100";
@@ -171,6 +180,22 @@ namespace AdaptiveFEM.ViewModels
             var solver = new AdaptiveFEM_H(mu, beta, sigma, f, A, B, Alpha, Gamma, Ua, Ub, Error, N);
             solver.Run();
             ShowTable(solver.Iterations.LastOrDefault());
+            var data = solver.Iterations.LastOrDefault();
+            var result = new List<NumericalResultItem>();
+            for (int i = 0; i < data.Elements.Count; ++i)
+            {
+                result.Add(new NumericalResultItem(data.Elements[i].Begin, data.Solution[i]));
+            }
+            result.Add(new NumericalResultItem(data.Elements[data.Elements.Count - 1].End, data.Solution[data.Elements.Count]));
+
+            SeriesCollection.Add(new LineSeries
+            {
+                Title = "u(x)",
+                Values = new ChartValues<double>(result.Select(x => x.Ux).ToList())
+            }
+            );
+            Labels = result.Select(x=>x.X.ToString()).ToArray();
+            YFormatter = value => value.ToString("C");
         }
 
         private void ShowTable(IterationData data)
