@@ -4,72 +4,172 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AdaptiveFEM"
-        xmlns:controls="clr-namespace:WpfMath.Controls;assembly=WpfMath"
-        xmlns:zed="clr-namespace:ZedGraph;assembly=ZedGraph"
+        xmlns:converters="clr-namespace:AdaptiveFEM.Converters"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
-        Title="h-Adaptive FEM" Height="700" Width="893" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="Адаптивний метод скінченних елементів" Height="600" Width="800">
+    <Window.Resources>
+        <converters:ListItemIdConverter x:Key="ListItemIdConverter"/>
+    </Window.Resources>
     <Grid>
-        <GroupBox x:Name="groupBoxInputData" Header="Input Data" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="237" Width="442">
-            <Grid HorizontalAlignment="Left" Height="203" Margin="0,10,0,0" VerticalAlignment="Top" Width="423">
-                <TextBox x:Name="muTxt" HorizontalAlignment="Left" Height="23" Margin="55,0,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="355" Text="1"/>
-                <TextBox x:Name="betaTxt" HorizontalAlignment="Left" Height="23" Margin="55,28,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="355" Text="100"/>
-                <TextBox x:Name="sigmaTxt" HorizontalAlignment="Left" Height="23" Margin="55,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="355" Text="0"/>
-                <TextBox x:Name="fTxt" HorizontalAlignment="Left" Height="23" Margin="55,84,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="355" Text="100"/>
-                <TextBox x:Name="aTxt" HorizontalAlignment="Left" Height="23" Margin="55,112,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" Text="0"/>
-                <TextBox x:Name="bTxt" HorizontalAlignment="Left" Height="23" Margin="55,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" Text="1"/>
-                <TextBox x:Name="alphaTxt" HorizontalAlignment="Left" Height="23" Margin="183,112,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" Text="100000"/>
-                <TextBox x:Name="u_aTxt" HorizontalAlignment="Left" Height="23" Margin="320,112,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" Text="0"/>
-                <TextBox x:Name="gammaTxt" HorizontalAlignment="Left" Height="23" Margin="183,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" Text="100000"/>
-                <TextBox x:Name="u_bTxt" HorizontalAlignment="Left" Height="23" Margin="320,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" Text="0"/>
-                <TextBox x:Name="errorTxt" HorizontalAlignment="Left" Height="23" Margin="185,168,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57" Text="10"/>
-                <TextBox x:Name="NTxt" HorizontalAlignment="Left" Height="23" Margin="55,168,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" Text="4"/>
-                <controls:FormulaControl Formula="\mu(x)" Margin="15,0,368,0" Width="40" VerticalAlignment="Top"/>
-                <controls:FormulaControl Formula="\beta(x)" Margin="15,27,368,0" Width="40" VerticalAlignment="Top" RenderTransformOrigin="-0.125,0.545"/>
-                <controls:FormulaControl Formula="f(x)" Margin="15,81,368,0" Width="40" VerticalAlignment="Top" RenderTransformOrigin="0.9,0.636"/>
-                <controls:FormulaControl Formula="\sigma(x)" Margin="15,54,368,0" Width="40" VerticalAlignment="Top" RenderTransformOrigin="0.975,0.591"/>
-                <controls:FormulaControl Formula="a" Margin="34,117,363,0" VerticalAlignment="Top" Height="14" RenderTransformOrigin="1.25,-0.571"/>
-                <controls:FormulaControl Formula="b" Margin="34,140,365,0" VerticalAlignment="Top" RenderTransformOrigin="-0.929,0.125"/>
-                <controls:FormulaControl Formula="\alpha" Margin="159,117,230,0" VerticalAlignment="Top" RenderTransformOrigin="0.25,0.636"/>
-                <controls:FormulaControl Formula="\gamma" Margin="159,145,234,0" VerticalAlignment="Top" RenderTransformOrigin="0.438,2.727"/>
-                <controls:FormulaControl Formula="u_a" Margin="291,119,98,0" VerticalAlignment="Top"/>
-                <controls:FormulaControl Formula="u_b" Margin="291,147,102,0" VerticalAlignment="Top" RenderTransformOrigin="0.9,0.5"/>
-                <controls:FormulaControl Formula="\eta" Margin="159,173,233,0" VerticalAlignment="Top" RenderTransformOrigin="0.635,0.455"/>
-                <controls:FormulaControl Formula="N" Margin="27,168,363,0" VerticalAlignment="Top" RenderTransformOrigin="2.478,0.125"/>
-                <controls:FormulaControl Formula="\%" Margin="253,169,140,0" VerticalAlignment="Top" RenderTransformOrigin="1.9,-0.556"/>
-            </Grid>
-        </GroupBox>
-        <GroupBox x:Name="groupBoxGraphicalResult" Header="Graphical Result" HorizontalAlignment="Left" Margin="10,252,0,0" VerticalAlignment="Top" Height="398" Width="547">
-            <Grid HorizontalAlignment="Left" Height="356" Margin="10,10,0,0" VerticalAlignment="Top" Width="521">
-                <controls:FormulaControl Formula="N=" Margin="426,10,54,0" VerticalAlignment="Top" RenderTransformOrigin="2.478,0.125"/>
-                <ListBox x:Name="listBox" ScrollViewer.VerticalScrollBarVisibility="Visible" HorizontalAlignment="Left" Height="320" Margin="426,36,0,0" VerticalAlignment="Top" Width="85" RenderTransformOrigin="0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="Вхідні дані" Margin="3">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="μ(x)="/>
+                    <Label Content="β(x)=" Grid.Row="1"/>
+                    <Label Content="σ(x)=" Grid.Row="2"/>
+                    <Label Content="f(x)=" Grid.Row="3"/>
+                    <TextBox Text="{Binding Mu, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="3"/>
+                    <TextBox Text="{Binding Beta, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="1" Margin="3"/>
+                    <TextBox Text="{Binding Sigma, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="2" Margin="3"/>
+                    <TextBox Text="{Binding F, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="3" Margin="3"/>
 
-                </ListBox>
+                    <Label Content="a=" Grid.Column="2" />
+                    <Label Content="b=" Grid.Row="1" Grid.Column="2" />
+                    <Label Content="n=" Grid.Row="2" Grid.Column="2" />
+                    <Label Content="α=" Grid.Row="3" Grid.Column="2" />
+                    <TextBox Text="{Binding A, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Margin="3"/>
+                    <TextBox Text="{Binding B, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Grid.Row="1" Margin="3"/>
+                    <TextBox Text="{Binding N, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Grid.Row="2" Margin="3"/>
+                    <TextBox Text="{Binding Alpha, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Grid.Row="3" Margin="3"/>
 
-                <WindowsFormsHost HorizontalAlignment="Left" Height="346" Margin="10,10,0,0" VerticalAlignment="Top" Width="400">
-                    <zed:ZedGraphControl x:Name="canvas" Width="400" Height="335" />
-                </WindowsFormsHost>
-                <TextBlock Text="{Binding ElementName=progressBar, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="458,15,45,325" />
-                <Label x:Name="iterationLabel" Content="0" HorizontalAlignment="Left" Margin="619,10,-136,0" VerticalAlignment="Top" RenderTransformOrigin="-0.211,1.731"/>
-                <Label Content="Iterations:" HorizontalAlignment="Left" Margin="552,10,-93,0" VerticalAlignment="Top"/>
-                <Label x:Name="timeLabel" Content="0" HorizontalAlignment="Left" Margin="738,10,-302,0" VerticalAlignment="Top" Width="85"/>
-                <Label Content="Time:" HorizontalAlignment="Left" Margin="685,10,-202,0" VerticalAlignment="Top" Width="38"/>
-                <Label x:Name="currentN" Content="0" HorizontalAlignment="Left" Margin="467,1,0,0" VerticalAlignment="Top" FontSize="16" Width="44"/>
-            </Grid>
-        </GroupBox>
-        <GroupBox  Header="Numerical Result" HorizontalAlignment="Left" Margin="562,252,0,0" VerticalAlignment="Top" Height="398" Width="304">
-            <Grid HorizontalAlignment="Right" Height="345" Margin="-2,26,-2,0" VerticalAlignment="Top" Width="296">
-                <DataGrid x:Name="table" Margin="10,33,0,0" VerticalAlignment="Top" Height="280" HorizontalAlignment="Left" Width="276"/>
-                <Button x:Name="drawSolutionBtn" IsEnabled="false" Content="Draw Solution" HorizontalAlignment="Left" Margin="98,318,0,0" VerticalAlignment="Top" Width="88" Click="drawSolutionBtn_Click"/>
-            </Grid>
-        </GroupBox>
-        <Button x:Name="solveBtn" Content="Solve" HorizontalAlignment="Left" Margin="335,203,0,0" VerticalAlignment="Top" Width="90" Height="23" Click="solveBtn_Click"/>
-        <GroupBox x:Name="groupBox" Header="Errors" HorizontalAlignment="Left" Margin="461,10,0,0" VerticalAlignment="Top" Width="405" Height="237">
-            <Grid HorizontalAlignment="Left" Height="201" Margin="10,10,0,0" VerticalAlignment="Top" Width="375">
-                <DataGrid x:Name="tableErrors" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="148" Width="355"/>
-                <Button x:Name="drawErrorNormBtn" IsEnabled="False" Content="DrawErrorNorm" HorizontalAlignment="Left" Margin="146,171,0,0" VerticalAlignment="Top" Width="90" Click="drawErrorNormBtn_Click" RenderTransformOrigin="0.744,0.45"/>
-                <Button x:Name="drawRellErrorBtn" IsEnabled="False" Content="DrawRelError" HorizontalAlignment="Left" Margin="254,171,0,0" VerticalAlignment="Top" Width="75" Click="drawRellErrorBtn_Click"/>
-                <Button x:Name="drawU_xDerivBtn" IsEnabled="False" Content="DrawUxDeriv" HorizontalAlignment="Left" Margin="38,171,0,0" VerticalAlignment="Top" Width="90" RenderTransformOrigin="0.744,0.45" Click="drawU_xDeriv_Click"/>
-            </Grid>
-        </GroupBox>
+                    <Label Content="ɣ=" Grid.Column="4" />
+                    <Label Content="η=" Grid.Row="1" Grid.Column="4" />
+                    <Label Content="ua=" Grid.Row="2" Grid.Column="4" />
+                    <Label Content="ub=" Grid.Row="3" Grid.Column="4" />
+                    <TextBox Text="{Binding Gamma, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Margin="3"/>
+                    <TextBox Text="{Binding Error, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Grid.Row="1" Margin="3"/>
+                    <TextBox Text="{Binding Ua, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Grid.Row="2" Margin="3"/>
+                    <TextBox Text="{Binding Ub, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Grid.Row="3" Margin="3"/>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Інфо" Margin="3" Grid.Column="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Всього ітерацій:"/>
+                        <Label FontWeight="Bold" Foreground="Green" Content="{Binding IterationCount}" Grid.Column="1"/>
+                        <Label Content="Поточна ітерація:" Grid.Row="1"/>
+                        <Label FontWeight="Bold" Content="{Binding CurrentIteration}" Grid.Row="1" Grid.Column="1"/>
+                        <Label Content="Скінченних елементів:" Grid.Row="2"/>
+                        <Label FontWeight="Bold" Content="{Binding ElementsCount}" Grid.Row="2" Grid.Column="1"/>
+                    </Grid>
+                    <Slider Value="{Binding CurrentIteration}" Minimum="1" Maximum="{Binding IterationCount}" Grid.Row="1"/>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Дії та очікуваний результат" Grid.Column="2" Margin="3">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Content="Обчислити" Command="{Binding SolveCommand}" Margin="3" />
+                        <Button Content="Очистити" Command="{Binding ClearCommand}" Margin="3" Grid.Column="1" />
+                    </Grid>
+                    <Label Content="Очікуваний результат:" Grid.Row="1" />
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="u(x)="/>
+                        <TextBox Text=""  Margin="3" Grid.Column="1"/>
+                    </Grid>
+                    <Button Content="Очікуваний графік" Grid.Row="3" Margin="3"/>
+                </Grid>
+            </GroupBox>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="Значення" Margin="3,0,3,3">
+                <Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.1*"></ColumnDefinition>
+                            <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                            <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Name="width1"></Border>
+                        <Border Grid.Column="1" Name="width2"></Border>
+                        <Border Grid.Column="2" Name="width3"></Border>
+                    </Grid>
+                    <ListView x:Name="nums" HorizontalAlignment="Left" Margin="3" ItemsSource="{Binding Path=NumResults, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="trimmed">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Height" Value="18" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text }" />
+                            </Style>
+                        </ListView.Resources>
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="#" Width="{Binding ElementName=width1, Path=ActualWidth}" DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}} , Converter={StaticResource ListItemIdConverter}}" />
+                                <GridViewColumn Header="x" Width="{Binding ElementName=width2, Path=ActualWidth}" DisplayMemberBinding="{Binding X}" />
+                                <GridViewColumn Header="u(x)" Width="{Binding ElementName=width3, Path=ActualWidth}" DisplayMemberBinding="{Binding Ux}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Графік" Grid.Column="1" Margin="3,0,3,3">
+                <lvc:CartesianChart Series="{Binding SeriesCollection}" LegendLocation="Right" >
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="u(x)" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="x" LabelFormatter="{Binding XFormatter}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
+            </GroupBox>
+        </Grid>
     </Grid>
 </Window>
