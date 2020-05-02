@@ -175,7 +175,7 @@ namespace AdaptiveFEM.ViewModels
             get => currentIteration;
             set
             {
-                if (currentIteration != value)
+                if (currentIteration != value && value != 0)
                 {
                     currentIteration = value;
                     if (Solver.Iterations?.Count != 0)
@@ -191,10 +191,6 @@ namespace AdaptiveFEM.ViewModels
             }
         }
         #endregion
-
-        public ObservableCollection<Solution> NumResults { get; set; }
-        public ICommand SolveCommand { get; private set; }
-
 
         private SeriesCollection seriesCollection;
         private Func<double, string> yFormatter;
@@ -228,6 +224,9 @@ namespace AdaptiveFEM.ViewModels
             }
         }
 
+        public ObservableCollection<Solution> NumResults { get; set; }
+        public ICommand SolveCommand { get; private set; }
+        public ICommand ClearCommand { get; private set; }
 
         public MainViewModel()
         {
@@ -235,7 +234,10 @@ namespace AdaptiveFEM.ViewModels
             SeriesCollection = new SeriesCollection();
             YFormatter = value => $"{value:0.00}";
             XFormatter = value => $"{value:0.00}";
+
             SolveCommand = new Command(Solve);
+            ClearCommand = new Command(Clear);
+
             Mu = "1";
             Beta = "100";
             Sigma = "0";
@@ -252,6 +254,9 @@ namespace AdaptiveFEM.ViewModels
 
         private void Solve(object parameter)
         {
+            currentIteration = 0;
+            SeriesCollection.Clear();
+
             var mu = new Function(Mu);
             var beta = new Function(Beta);
             var sigma = new Function(Sigma);
@@ -262,6 +267,13 @@ namespace AdaptiveFEM.ViewModels
 
             IterationCount = Solver.Iterations.Count;
             CurrentIteration = Solver.Iterations.Count;
+        }
+
+        private void Clear(object parameter)
+        {
+            currentIteration = 0;
+            SeriesCollection.Clear();
+            NumResults.Clear();
         }
 
         private List<Solution> PopulateResult(Iteration data)
@@ -288,10 +300,38 @@ namespace AdaptiveFEM.ViewModels
         {
             SeriesCollection.Add(new LineSeries
             {
-                Title = "u(x)",
+                Title = $"u{Subscript(CurrentIteration)}(x)",
                 Values = new ChartValues<ObservablePoint>(numList.Select(elem => new ObservablePoint(elem.X, elem.Ux))),
                 LineSmoothness = 0
             });
+        }
+
+        private string Subscript(int number)
+        {
+            var strNumber = number.ToString();
+            if (strNumber.Length == 1)
+            {
+                switch (number)
+                {
+                    case 0: return "\u2080";
+                    case 1: return "\u2081";
+                    case 2: return "\u2082";
+                    case 3: return "\u2083";
+                    case 4: return "\u2084";
+                    case 5: return "\u2085";
+                    case 6: return "\u2086";
+                    case 7: return "\u2087";
+                    case 8: return "\u2088";
+                    case 9: return "\u2089";
+                }
+            }
+
+            var result = string.Empty;
+            foreach (var symbol in strNumber)
+            {
+                result += Subscript(Convert.ToInt32(symbol.ToString()));
+            }
+            return result;
         }
     }
 }

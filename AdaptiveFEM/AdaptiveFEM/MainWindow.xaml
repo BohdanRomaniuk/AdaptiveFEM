@@ -84,7 +84,7 @@
                         </Grid.ColumnDefinitions>
                         <Label Content="Всього ітерацій:"/>
                         <Label FontWeight="Bold" Foreground="Green" Content="{Binding IterationCount}" Grid.Column="1"/>
-                        <Label Content="Поточні ітерація:" Grid.Row="1"/>
+                        <Label Content="Поточна ітерація:" Grid.Row="1"/>
                         <Label FontWeight="Bold" Content="{Binding CurrentIteration}" Grid.Row="1" Grid.Column="1"/>
                         <Label Content="Скінченних елементів:" Grid.Row="2"/>
                         <Label FontWeight="Bold" Content="{Binding ElementsCount}" Grid.Row="2" Grid.Column="1"/>
@@ -100,7 +100,14 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Button Content="Обчислити" Command="{Binding SolveCommand}" Margin="3" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Content="Обчислити" Command="{Binding SolveCommand}" Margin="3" />
+                        <Button Content="Очистити" Command="{Binding ClearCommand}" Margin="3" Grid.Column="1" />
+                    </Grid>
                     <Label Content="Очікуваний результат:" Grid.Row="1" />
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
