@@ -196,14 +196,45 @@ namespace AdaptiveFEM.ViewModels
         public ICommand SolveCommand { get; private set; }
 
 
-        public SeriesCollection SeriesCollection { get; set; }
-        public string[] Labels { get; set; }
-        public Func<double, string> YFormatter { get; set; }
+        private SeriesCollection seriesCollection;
+        private Func<double, string> yFormatter;
+        private Func<double, string> xFormatter;
+
+        public SeriesCollection SeriesCollection
+        {
+            get => seriesCollection;
+            set
+            {
+                seriesCollection = value;
+                OnPropertyChanged(nameof(SeriesCollection));
+            }
+        }
+        public Func<double, string> YFormatter
+        {
+            get => yFormatter;
+            set
+            {
+                yFormatter = value;
+                OnPropertyChanged(nameof(YFormatter));
+            }
+        }
+        public Func<double, string> XFormatter
+        {
+            get => xFormatter;
+            set
+            {
+                xFormatter = value;
+                OnPropertyChanged(nameof(XFormatter));
+            }
+        }
+
 
         public MainViewModel()
         {
             NumResults = new ObservableCollection<Solution>();
             SeriesCollection = new SeriesCollection();
+            YFormatter = value => $"{value:0.00}";
+            XFormatter = value => $"{value:0.00}";
             SolveCommand = new Command(Solve);
             Mu = "1";
             Beta = "100";
@@ -221,7 +252,6 @@ namespace AdaptiveFEM.ViewModels
 
         private void Solve(object parameter)
         {
-
             var mu = new Function(Mu);
             var beta = new Function(Beta);
             var sigma = new Function(Sigma);
@@ -262,8 +292,6 @@ namespace AdaptiveFEM.ViewModels
                 Values = new ChartValues<ObservablePoint>(numList.Select(elem => new ObservablePoint(elem.X, elem.Ux))),
                 LineSmoothness = 0
             });
-            //Labels = numList.Select(x => x.X.ToString()).ToArray();
-            //YFormatter = value => value.ToString("C");
         }
     }
 }
