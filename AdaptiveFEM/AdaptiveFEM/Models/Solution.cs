@@ -1,11 +1,11 @@
 ﻿namespace AdaptiveFEM.Models
 {
-    public class NumericalResultItem
+    public class Solution
     {
         public double X { get; set; }
         public double Ux { get; set; }
 
-        public NumericalResultItem(double x, double ux)
+        public Solution(double x, double ux)
         {
             X = x;
             Ux = ux;

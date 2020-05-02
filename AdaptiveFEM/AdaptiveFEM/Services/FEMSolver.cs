@@ -5,7 +5,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace AdaptiveFEM.Services
 {
-    public class AdaptiveFEM_H
+    public class FEMSolver
     {
         //Functions
         Function mu;
@@ -24,10 +24,10 @@ namespace AdaptiveFEM.Services
         int initialN;
 
         //Result
-        List<IterationData> iterations;
+        List<Iteration> iterations;
 
         //Constructor with parameters
-        public AdaptiveFEM_H(Function mu, Function beta, Function sigma, Function f,
+        public FEMSolver(Function mu, Function beta, Function sigma, Function f,
                              double a, double b, double alpha, double gamma, double u_a, double u_b, double error, int N)
         {
             this.mu = mu;
@@ -43,10 +43,10 @@ namespace AdaptiveFEM.Services
             this.error = error;
             this.initialN = N;
 
-            iterations = new List<IterationData>();
+            iterations = new List<Iteration>();
         }
 
-        public List<IterationData> Iterations { get { return this.iterations; } }
+        public List<Iteration> Iterations { get { return this.iterations; } }
         public double A { get { return this.a; } }
         public double B { get { return this.b; } }
 
@@ -83,7 +83,7 @@ namespace AdaptiveFEM.Services
             }
 
             //Setting iteration data
-            IterationData data = new IterationData();
+            Iteration data = new Iteration();
             data.Elements = e;
             data.Solution = solution;
             data.SolutionCenter = solutionCenter;
@@ -188,7 +188,7 @@ namespace AdaptiveFEM.Services
                         solutionCenterDeriv[i - 1] = (solution[i] - solution[i - 1]) / elements[i - 1].H;
                     }
 
-                    IterationData data = new IterationData();
+                    Iteration data = new Iteration();
                     data.Elements = elements;
                     data.Solution = solution;
                     data.SolutionCenter = solutionCenter;
@@ -202,7 +202,7 @@ namespace AdaptiveFEM.Services
 
         }
 
-        public void CalculateErrors(ref IterationData data)
+        public void CalculateErrors(ref Iteration data)
         {
             int N = data.Elements.Count;
             Vector errors = new DenseVector(N);
@@ -242,28 +242,14 @@ namespace AdaptiveFEM.Services
             data.Errors = errors;
         }
 
-        //Solve System
         public Vector Solve(Matrix matrix, Vector vector)
         {
-            if (matrix.ColumnCount == matrix.RowCount && matrix.ColumnCount == vector.Count)
+            if (matrix.ColumnCount != matrix.RowCount || matrix.ColumnCount != vector.Count)
             {
-                Vector result = new DenseVector(vector.Count);
-
-                //IterationCountStopCriterium iterationCountStopCriterium = new IterationCountStopCriterium(100);
-                //ResidualStopCriterium residualStopCriterium = new ResidualStopCriterium((float)1E-12);
-                //Iterator monitor = new Iterator(new IIterationStopCriterium[] { iterationCountStopCriterium, residualStopCriterium });
-                //GMRES.GMRES solver = new GMRES.GMRES(monitor);
-                //result = solver.Solve(matrix, vector);
-                //return result;
-
-                //TODO: CHECK THIS ONE
-                result = (Vector)matrix.Solve(vector);
-                return result;
+                throw new Exception("Sizes of matrix and vector are not the same");
             }
-            else
-            {
-                throw new Exception("Matrix and vector sizes don't match.");
-            }
+
+            return (Vector)matrix.Solve(vector);
         }
     }
 }

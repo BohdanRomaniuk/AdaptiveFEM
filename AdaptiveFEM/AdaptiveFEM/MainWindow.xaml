@@ -20,6 +20,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <GroupBox Header="Вхідні дані" Margin="3">
                 <Grid>
@@ -65,7 +66,33 @@
                     <TextBox Text="{Binding Ub, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Grid.Row="3" Margin="3"/>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Дії та очікуваний результат" Grid.Column="1" Margin="3">
+            <GroupBox Header="Інфо" Margin="3" Grid.Column="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Всього ітерацій:"/>
+                        <Label FontWeight="Bold" Foreground="Green" Content="{Binding IterationCount}" Grid.Column="1"/>
+                        <Label Content="Поточні ітерація:" Grid.Row="1"/>
+                        <Label FontWeight="Bold" Content="{Binding CurrentIteration}" Grid.Row="1" Grid.Column="1"/>
+                        <Label Content="Скінченних елементів:" Grid.Row="2"/>
+                        <Label FontWeight="Bold" Content="{Binding ElementsCount}" Grid.Row="2" Grid.Column="1"/>
+                    </Grid>
+                    <Slider Value="{Binding CurrentIteration}" Minimum="1" Maximum="{Binding IterationCount}" Grid.Row="1"/>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Дії та очікуваний результат" Grid.Column="2" Margin="3">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -75,7 +102,14 @@
                     </Grid.RowDefinitions>
                     <Button Content="Обчислити" Command="{Binding SolveCommand}" Margin="3" />
                     <Label Content="Очікуваний результат:" Grid.Row="1" />
-                    <TextBox Text="" Grid.Row="2" Margin="3"/>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="u(x)="/>
+                        <TextBox Text=""  Margin="3" Grid.Column="1"/>
+                    </Grid>
                     <Button Content="Очікуваний графік" Grid.Row="3" Margin="3"/>
                 </Grid>
             </GroupBox>
@@ -122,10 +156,10 @@
             <GroupBox Header="Графік" Grid.Column="1" Margin="3,0,3,3">
                 <lvc:CartesianChart Series="{Binding SeriesCollection}" LegendLocation="Right" >
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="Sales" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
+                        <lvc:Axis Title="u(x)" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Month" Labels="{Binding Labels}"></lvc:Axis>
+                        <lvc:Axis Title="x" Labels="{Binding Labels}"></lvc:Axis>
                     </lvc:CartesianChart.AxisX>
                 </lvc:CartesianChart>
             </GroupBox>

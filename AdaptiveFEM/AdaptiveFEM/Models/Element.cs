@@ -2,22 +2,17 @@
 {
     public class Element
     {
-        private double begin;
-        private double end;
-        private double midPoint;
-        private double h;
+        public double Begin { get; set; }
+        public double End { get; set; }
+        public double MidPoint { get; set; }
+        public double H { get; set; }
 
         public Element(double begin, double end, double midPoint, double h)
         {
-            this.begin = begin;
-            this.end = end;
-            this.midPoint = midPoint;
-            this.h = h;
+            Begin = begin;
+            End = end;
+            MidPoint = midPoint;
+            H = h;
         }
-
-        public double Begin { get { return this.begin; } }
-        public double End { get { return this.end; } }
-        public double MidPoint { get { return this.midPoint; } }
-        public double H { get { return this.h; } }
     }
 }

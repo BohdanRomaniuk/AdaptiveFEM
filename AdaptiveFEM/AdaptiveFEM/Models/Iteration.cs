@@ -3,17 +3,16 @@ using System.Collections.Generic;
 
 namespace AdaptiveFEM.Models
 {
-    public class IterationData
+    public class Iteration
     {
-        //N
         public List<Element> Elements { get; set; }
-        //N
+
         public Vector SolutionCenter { get; set; }
-        //N
+
         public Vector SolutionCenterDeriv { get; set; }
-        //N
+
         public Vector Errors { get; set; }
-        //N+1
+
         public Vector Solution { get; set; }
 
         public Vector ErrorsNormsV { get; set; }

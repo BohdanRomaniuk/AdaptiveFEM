@@ -1,7 +1,4 @@
 ﻿using PoohMathParser;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AdaptiveFEM.Models
 {
@@ -11,12 +8,12 @@ namespace AdaptiveFEM.Models
 
         public Function()
         {
-            this.function = "0";
+            function = "0";
         }
 
         public Function(string newFunction)
         {
-            this.function = newFunction;
+            function = newFunction;
         }
 
         public double Evaluate(double x)
@@ -36,7 +33,7 @@ namespace AdaptiveFEM.Models
 
         public override string ToString()
         {
-            return this.function;
+            return function;
         }
     }
 }

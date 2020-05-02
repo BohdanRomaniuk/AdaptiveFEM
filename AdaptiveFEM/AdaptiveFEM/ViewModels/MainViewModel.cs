@@ -1,15 +1,13 @@
 ﻿using AdaptiveFEM.Models;
 using AdaptiveFEM.Services;
 using LiveCharts;
+using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace AdaptiveFEM.ViewModels
 {
@@ -29,6 +27,11 @@ namespace AdaptiveFEM.ViewModels
         private double ub;
         private double error;
         private int n;
+
+        private FEMSolver solver;
+        private int iterationCount;
+        private int elementsCount;
+        private int currentIteration;
 
         public string Mu
         {
@@ -140,9 +143,56 @@ namespace AdaptiveFEM.ViewModels
             }
         }
 
+        public FEMSolver Solver
+        {
+            get => solver;
+            set
+            {
+                solver = value;
+                OnPropertyChanged(nameof(Solver));
+            }
+        }
+        public int IterationCount
+        {
+            get => iterationCount;
+            set
+            {
+                iterationCount = value;
+                OnPropertyChanged(nameof(IterationCount));
+            }
+        }
+        public int ElementsCount
+        {
+            get => elementsCount;
+            set
+            {
+                elementsCount = value;
+                OnPropertyChanged(nameof(ElementsCount));
+            }
+        }
+        public int CurrentIteration
+        {
+            get => currentIteration;
+            set
+            {
+                if (currentIteration != value)
+                {
+                    currentIteration = value;
+                    if (Solver.Iterations?.Count != 0)
+                    {
+                        var lastIter = Solver.Iterations[currentIteration - 1];
+                        ElementsCount = lastIter.Elements.Count;
+                        var result = PopulateResult(lastIter);
+                        ShowTable(result);
+                        DrawGraphic(result);
+                    }
+                    OnPropertyChanged(nameof(CurrentIteration));
+                }
+            }
+        }
         #endregion
 
-        public ObservableCollection<NumericalResultItem> NumResults { get; set; }
+        public ObservableCollection<Solution> NumResults { get; set; }
         public ICommand SolveCommand { get; private set; }
 
 
@@ -152,7 +202,7 @@ namespace AdaptiveFEM.ViewModels
 
         public MainViewModel()
         {
-            NumResults = new ObservableCollection<NumericalResultItem>();
+            NumResults = new ObservableCollection<Solution>();
             SeriesCollection = new SeriesCollection();
             SolveCommand = new Command(Solve);
             Mu = "1";
@@ -171,40 +221,49 @@ namespace AdaptiveFEM.ViewModels
 
         private void Solve(object parameter)
         {
-            NumResults.Clear();
+
             var mu = new Function(Mu);
             var beta = new Function(Beta);
             var sigma = new Function(Sigma);
             var f = new Function(F);
 
-            var solver = new AdaptiveFEM_H(mu, beta, sigma, f, A, B, Alpha, Gamma, Ua, Ub, Error, N);
-            solver.Run();
-            ShowTable(solver.Iterations.LastOrDefault());
-            var data = solver.Iterations.LastOrDefault();
-            var result = new List<NumericalResultItem>();
+            Solver = new FEMSolver(mu, beta, sigma, f, A, B, Alpha, Gamma, Ua, Ub, Error, N);
+            Solver.Run();
+
+            IterationCount = Solver.Iterations.Count;
+            CurrentIteration = Solver.Iterations.Count;
+        }
+
+        private List<Solution> PopulateResult(Iteration data)
+        {
+            var result = new List<Solution>();
             for (int i = 0; i < data.Elements.Count; ++i)
             {
-                result.Add(new NumericalResultItem(data.Elements[i].Begin, data.Solution[i]));
+                result.Add(new Solution(data.Elements[i].Begin, data.Solution[i]));
             }
-            result.Add(new NumericalResultItem(data.Elements[data.Elements.Count - 1].End, data.Solution[data.Elements.Count]));
+            result.Add(new Solution(data.Elements[data.Elements.Count - 1].End, data.Solution[data.Elements.Count]));
+            return result;
+        }
 
+        private void ShowTable(List<Solution> numList)
+        {
+            NumResults.Clear();
+            foreach (var num in numList)
+            {
+                NumResults.Add(num);
+            }
+        }
+
+        private void DrawGraphic(List<Solution> numList)
+        {
             SeriesCollection.Add(new LineSeries
             {
                 Title = "u(x)",
-                Values = new ChartValues<double>(result.Select(x => x.Ux).ToList())
-            }
-            );
-            Labels = result.Select(x=>x.X.ToString()).ToArray();
-            YFormatter = value => value.ToString("C");
-        }
-
-        private void ShowTable(IterationData data)
-        {
-            for (int i = 0; i < data.Elements.Count; ++i)
-            {
-                NumResults.Add(new NumericalResultItem(data.Elements[i].Begin, data.Solution[i]));
-            }
-            NumResults.Add(new NumericalResultItem(data.Elements[data.Elements.Count - 1].End, data.Solution[data.Elements.Count]));
+                Values = new ChartValues<ObservablePoint>(numList.Select(elem => new ObservablePoint(elem.X, elem.Ux))),
+                LineSmoothness = 0
+            });
+            //Labels = numList.Select(x => x.X.ToString()).ToArray();
+            //YFormatter = value => value.ToString("C");
         }
     }
 }
