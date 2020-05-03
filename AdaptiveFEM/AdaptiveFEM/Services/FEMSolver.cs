@@ -2,229 +2,212 @@
 using System;
 using System.Collections.Generic;
 using MathNet.Numerics.LinearAlgebra.Double;
+using AdaptiveFEM.Services.Interfaces;
 
 namespace AdaptiveFEM.Services
 {
-    public class FEMSolver
+    public class FEMSolver : IFEMSolver
     {
-        Function mu;
-        Function beta;
-        Function sigma;
-        Function f;
+        public Function Mu { get; set; }
+        public Function Beta { get; set; }
+        public Function Sigma { get; set; }
+        public Function F { get; set; }
 
-        double a;
-        double b;
-        double alpha;
-        double gamma;
-        double u_a;
-        double u_b;
-        double error;
-        int initialN;
-
+        public double A { get; set; }
+        public double B { get; set; }
+        public double Alpha { get; set; }
+        public double Gamma { get; set; }
+        public double Ua { get; set; }
+        public double Ub { get; set; }
+        public double Error { get; set; }
+        public int InitialN { get; set; }
         public List<Iteration> Iterations { get; set; }
 
-        public FEMSolver(Function mu, Function beta, Function sigma, Function f,
-                             double a, double b, double alpha, double gamma, double u_a, double u_b, double error, int N)
+        public FEMSolver(Function mu, Function beta, Function sigma, Function f, double a, double b, double alpha, double gamma, double ua, double ub, double error, int n)
         {
-            this.mu = mu;
-            this.beta = beta;
-            this.sigma = sigma;
-            this.f = f;
-            this.a = a;
-            this.b = b;
-            this.alpha = alpha;
-            this.gamma = gamma;
-            this.u_a = u_a;
-            this.u_b = u_b;
-            this.error = error;
-            this.initialN = N;
-
             Iterations = new List<Iteration>();
+            Mu = mu;
+            Beta = beta;
+            Sigma = sigma;
+            F = f;
+            A = a;
+            B = b;
+            Alpha = alpha;
+            Gamma = gamma;
+            Ua = ua;
+            Ub = ub;
+            Error = error;
+            InitialN = n;
         }
 
         public void Solve()
         {
-            InitialIteration();
-            //Indexes of elements with the largest error
-            List<int> indexes = new List<int>();
+            FirstIteration();
+            //Indexes of elements with the largest Error
+            var indexes = new List<int>();
             int iterationNumber = 1;
 
             do
             {
                 indexes.Clear();
-                //Finding indexes of elements with error, larger then needed
+                //Finding indexes of elements with Error, larger then needed
                 for (int i = 0; i < Iterations[iterationNumber - 1].Elements.Count; ++i)
                 {
-                    if (Iterations[iterationNumber - 1].Errors[i] > error)
+                    if (Iterations[iterationNumber - 1].Errors[i] > Error)
                     {
                         indexes.Add(i);
                     }
                 }
 
-                if (indexes.Count != 0)
+                if (indexes.Count == 0)
                 {
-                    //Divide elements with unappropriate error
-                    List<Element> elements = new List<Element>();
-                    for (int i = 0; i < Iterations[iterationNumber - 1].Elements.Count; ++i)
-                    {
-                        if (!indexes.Contains(i))
-                        {
-                            elements.Add(Iterations[iterationNumber - 1].Elements[i]);
-                        }
-                        else
-                        {
-                            Element e = Iterations[iterationNumber - 1].Elements[i];
-                            Element e1 = new Element(e.Begin, e.MidPoint, (e.Begin + e.MidPoint) / 2, e.MidPoint - e.Begin);
-                            Element e2 = new Element(e.MidPoint, e.End, (e.MidPoint + e.End) / 2, e.End - e.MidPoint);
-                            elements.Add(e1);
-                            elements.Add(e2);
-                        }
-                    }
-
-                    int N = elements.Count;
-                    Matrix matrix = GenereteMatrix(elements);
-                    Vector vector = GenereteVector(elements);
-                    Vector solution = Solve(matrix, vector);
-                    Vector solutionCenter = new DenseVector(N);
-                    Vector solutionCenterDeriv = new DenseVector(N);
-                    for (int i = 1; i < solution.Count; ++i)
-                    {
-                        solutionCenter[i - 1] = (solution[i] + solution[i - 1]) * 0.5;
-                        solutionCenterDeriv[i - 1] = (solution[i] - solution[i - 1]) / elements[i - 1].H;
-                    }
-
-                    Iteration data = new Iteration();
-                    data.Elements = elements;
-                    data.Solution = solution;
-                    data.SolutionCenter = solutionCenter;
-                    data.SolutionCenterDeriv = solutionCenterDeriv;
-                    CalculateErrors(ref data);
-                    Iterations.Add(data);
-                    ++iterationNumber;
+                    continue;
                 }
+                //Divide elements with unappropriate Error
+                var elements = new List<Element>();
+                for (int i = 0; i < Iterations[iterationNumber - 1].Elements.Count; ++i)
+                {
+                    if (!indexes.Contains(i))
+                    {
+                        elements.Add(Iterations[iterationNumber - 1].Elements[i]);
+                    }
+                    else
+                    {
+                        var elem = Iterations[iterationNumber - 1].Elements[i];
+                        var leftElem = new Element(elem.Begin, elem.MidPoint, (elem.Begin + elem.MidPoint) / 2, elem.MidPoint - elem.Begin);
+                        var rightElem = new Element(elem.MidPoint, elem.End, (elem.MidPoint + elem.End) / 2, elem.End - elem.MidPoint);
+                        elements.Add(leftElem);
+                        elements.Add(rightElem);
+                    }
+                }
+
+                var n = elements.Count;
+                var matrix = GenereteMatrix(elements);
+                var vector = GenereteVector(elements);
+                var solution = Solve(matrix, vector);
+                var solutionCenter = new DenseVector(n);
+                var solutionCenterDeriv = new DenseVector(n);
+                for (int i = 1; i < solution.Count; ++i)
+                {
+                    solutionCenter[i - 1] = (solution[i] + solution[i - 1]) * 0.5;
+                    solutionCenterDeriv[i - 1] = (solution[i] - solution[i - 1]) / elements[i - 1].H;
+                }
+
+                var iteration = new Iteration();
+                iteration.Elements = elements;
+                iteration.Solution = solution;
+                iteration.SolutionCenter = solutionCenter;
+                iteration.SolutionCenterDeriv = solutionCenterDeriv;
+                CalculateErrors(ref iteration);
+                Iterations.Add(iteration);
+                ++iterationNumber;
             }
             while (indexes.Count != 0);
         }
 
-        private void InitialIteration()
+        private void FirstIteration()
         {
-            //Set elements
-            List<Element> e = InitialFiniteElements();
-
-            //Solve system
-            Matrix matrix = GenereteMatrix(e);
-            Vector vector = GenereteVector(e);
-            Vector solution = Solve(matrix, vector);
+            var elements = FirstIterationElements();
+            var matrix = GenereteMatrix(elements);
+            var vector = GenereteVector(elements);
+            var solution = Solve(matrix, vector);
 
             //Solution in midPoint
-            Vector solutionCenter = new DenseVector(initialN);
-            Vector solutionCenterDeriv = new DenseVector(initialN);
+            var solutionCenter = new DenseVector(InitialN);
+            var solutionCenterDeriv = new DenseVector(InitialN);
             for (int i = 1; i < solution.Count; ++i)
             {
                 solutionCenter[i - 1] = (solution[i] + solution[i - 1]) * 0.5;
-                solutionCenterDeriv[i - 1] = (solution[i] - solution[i - 1]) / e[i - 1].H;
+                solutionCenterDeriv[i - 1] = (solution[i] - solution[i - 1]) / elements[i - 1].H;
             }
 
-            //Setting iteration data
-            Iteration data = new Iteration();
-            data.Elements = e;
-            data.Solution = solution;
-            data.SolutionCenter = solutionCenter;
-            data.SolutionCenterDeriv = solutionCenterDeriv;
-
-            //Calculating errors
-            CalculateErrors(ref data);
-
-            //Save iteration data
-            Iterations.Add(data);
+            var iteration = new Iteration();
+            iteration.Elements = elements;
+            iteration.Solution = solution;
+            iteration.SolutionCenter = solutionCenter;
+            iteration.SolutionCenterDeriv = solutionCenterDeriv;
+            CalculateErrors(ref iteration);
+            Iterations.Add(iteration);
         }
 
-        private List<Element> InitialFiniteElements()
+        private List<Element> FirstIterationElements()
         {
-            List<Element> e = new List<Element>();
-            double step = Math.Abs(b - a) / initialN;
-            double i = a;
-            while (i < b)
+            var elements = new List<Element>();
+            var step = Math.Abs(B - A) / InitialN;
+            var xi = A;
+            while (xi < B)
             {
-                e.Add(new Element(i, Math.Round(i + step, 10), Math.Round(i + step / 2, 10), step));
-                i = Math.Round(i + step, 10);
+                elements.Add(new Element(xi, Math.Round(xi + step, 10), Math.Round(xi + step / 2, 10), step));
+                xi = Math.Round(xi + step, 10);
             }
-            return e;
+            return elements;
         }
 
-        private Matrix GenereteMatrix(List<Element> e)
+        private Matrix GenereteMatrix(List<Element> elem)
         {
-            int N = e.Count;
-            //Matrix
-            Matrix matrix = new DenseMatrix(N + 1, N + 1);
-            matrix[0, 0] = mu.Evaluate(e[0].MidPoint) / e[0].H - beta.Evaluate(e[0].MidPoint) / 2 + sigma.Evaluate(e[0].MidPoint) * e[0].H / 3 + alpha;
-            matrix[0, 1] = -mu.Evaluate(e[0].MidPoint) / e[0].H + beta.Evaluate(e[0].MidPoint) / 2 + sigma.Evaluate(e[0].MidPoint) * e[0].H / 6;
-            for (int i = 1; i < N; ++i)
+            var n = elem.Count;
+            var matrix = new DenseMatrix(n + 1, n + 1);
+            matrix[0, 0] = Mu.Evaluate(elem[0].MidPoint) / elem[0].H - Beta.Evaluate(elem[0].MidPoint) / 2 + Sigma.Evaluate(elem[0].MidPoint) * elem[0].H / 3 + Alpha;
+            matrix[0, 1] = -Mu.Evaluate(elem[0].MidPoint) / elem[0].H + Beta.Evaluate(elem[0].MidPoint) / 2 + Sigma.Evaluate(elem[0].MidPoint) * elem[0].H / 6;
+            for (int i = 1; i < n; ++i)
             {
-                matrix[i, i - 1] = -mu.Evaluate(e[i - 1].MidPoint) / e[i - 1].H - beta.Evaluate(e[i - 1].MidPoint) / 2 + sigma.Evaluate(e[i - 1].MidPoint) * e[i - 1].H / 6;
-
-                matrix[i, i] = mu.Evaluate(e[i - 1].MidPoint) / e[i - 1].H + beta.Evaluate(e[i - 1].MidPoint) / 2 + sigma.Evaluate(e[i - 1].MidPoint) * e[i - 1].H / 3 +
-                    mu.Evaluate(e[i].MidPoint) / e[i].H - beta.Evaluate(e[i].MidPoint) / 2 + sigma.Evaluate(e[i].MidPoint) * e[i].H / 3;
-
-                matrix[i, i + 1] = -mu.Evaluate(e[i].MidPoint) / e[i].H + beta.Evaluate(e[i].MidPoint) / 2 + sigma.Evaluate(e[i].MidPoint) * e[i].H / 6;
+                matrix[i, i - 1] = -Mu.Evaluate(elem[i - 1].MidPoint) / elem[i - 1].H - Beta.Evaluate(elem[i - 1].MidPoint) / 2 + Sigma.Evaluate(elem[i - 1].MidPoint) * elem[i - 1].H / 6;
+                matrix[i, i] = Mu.Evaluate(elem[i - 1].MidPoint) / elem[i - 1].H + Beta.Evaluate(elem[i - 1].MidPoint) / 2 + Sigma.Evaluate(elem[i - 1].MidPoint) * elem[i - 1].H / 3 + Mu.Evaluate(elem[i].MidPoint) / elem[i].H - Beta.Evaluate(elem[i].MidPoint) / 2 + Sigma.Evaluate(elem[i].MidPoint) * elem[i].H / 3;
+                matrix[i, i + 1] = -Mu.Evaluate(elem[i].MidPoint) / elem[i].H + Beta.Evaluate(elem[i].MidPoint) / 2 + Sigma.Evaluate(elem[i].MidPoint) * elem[i].H / 6;
             }
-            matrix[N, N - 1] = -mu.Evaluate(e[N - 1].MidPoint) / e[N - 1].H - beta.Evaluate(e[N - 1].MidPoint) / 2 + sigma.Evaluate(e[N - 1].MidPoint) * e[N - 1].H / 6;
-            matrix[N, N] = mu.Evaluate(e[N - 1].MidPoint) / e[N - 1].H + beta.Evaluate(e[N - 1].MidPoint) / 2 + sigma.Evaluate(e[N - 1].MidPoint) * e[N - 1].H / 3 + gamma;
+            matrix[n, n - 1] = -Mu.Evaluate(elem[n - 1].MidPoint) / elem[n - 1].H - Beta.Evaluate(elem[n - 1].MidPoint) / 2 + Sigma.Evaluate(elem[n - 1].MidPoint) * elem[n - 1].H / 6;
+            matrix[n, n] = Mu.Evaluate(elem[n - 1].MidPoint) / elem[n - 1].H + Beta.Evaluate(elem[n - 1].MidPoint) / 2 + Sigma.Evaluate(elem[n - 1].MidPoint) * elem[n - 1].H / 3 + Gamma;
+            
             return matrix;
         }
 
-        private Vector GenereteVector(List<Element> e)
+        private Vector GenereteVector(List<Element> elem)
         {
-            int N = e.Count;
-            //Vector
-            Vector vector = new DenseVector(N + 1);
-            vector[0] = 0.5 * e[0].H * f.Evaluate(e[0].MidPoint) + alpha * u_a;
-            for (int i = 1; i < N; ++i)
+            var n = elem.Count;
+            Vector vector = new DenseVector(n + 1);
+            vector[0] = 0.5 * elem[0].H * F.Evaluate(elem[0].MidPoint) + Alpha * Ua;
+            for (int i = 1; i < n; ++i)
             {
-                vector[i] = 0.5 * (e[i - 1].H * f.Evaluate(e[i - 1].MidPoint) + e[i].H * f.Evaluate(e[i].MidPoint));
+                vector[i] = 0.5 * (elem[i - 1].H * F.Evaluate(elem[i - 1].MidPoint) + elem[i].H * F.Evaluate(elem[i].MidPoint));
             }
-            vector[N] = 0.5 * e[N - 1].H * f.Evaluate(e[N - 1].MidPoint) + gamma * u_b;
+            vector[n] = 0.5 * elem[n - 1].H * F.Evaluate(elem[n - 1].MidPoint) + Gamma * Ub;
+            
             return vector;
         }
 
-        private void CalculateErrors(ref Iteration data)
+        private void CalculateErrors(ref Iteration iter)
         {
-            int N = data.Elements.Count;
-            Vector errors = new DenseVector(N);
-            Vector errorsNorms = new DenseVector(N);
+            var n = iter.Elements.Count;
+            var errors = new DenseVector(n);
+            var errorsNorms = new DenseVector(n);
 
-            double eNormV2 = 0;
-            double uNormV2 = 0;
-            for (int i = 0; i < N; ++i)
+            var eNormV2 = 0.0;
+            var uNormV2 = 0.0;
+            for (int i = 0; i < n; ++i)
             {
-                //eNormV2_i = m * (b * b / d)
-                double m = data.Elements[i].H * data.Elements[i].H * data.Elements[i].H / mu.Evaluate(data.Elements[i].MidPoint);
-                double b = f.Evaluate(data.Elements[i].MidPoint) - beta.Evaluate(data.Elements[i].MidPoint) * data.SolutionCenterDeriv[i] - sigma.Evaluate(data.Elements[i].MidPoint) * data.SolutionCenter[i];
-                double d = 10 + data.Elements[i].H * data.Elements[i].H * sigma.Evaluate(data.Elements[i].MidPoint) / mu.Evaluate(data.Elements[i].MidPoint);
-                double e_h2 = (5.0 / 6) * m * (b * b / d);
-                //double a = (2.0 / 3) * data.Elements[i].H * data.Elements[i].H * (f.Evaluate(data.Elements[i].MidPoint) - beta.Evaluate(data.Elements[i].MidPoint) * data.SolutionCenterDeriv[i] - sigma.Evaluate(data.Elements[i].MidPoint) * data.SolutionCenter[i]);
-                //double b = (16.0 / 3) * mu.Evaluate(data.Elements[i].MidPoint) / data.Elements[i].H + (8.0 / 15) * sigma.Evaluate(data.Elements[i].MidPoint) * data.Elements[i].H;
-                //double e_h2 = a*a/b;
+                var m = iter.Elements[i].H * iter.Elements[i].H * iter.Elements[i].H / Mu.Evaluate(iter.Elements[i].MidPoint);
+                var B = F.Evaluate(iter.Elements[i].MidPoint) - Beta.Evaluate(iter.Elements[i].MidPoint) * iter.SolutionCenterDeriv[i] - Sigma.Evaluate(iter.Elements[i].MidPoint) * iter.SolutionCenter[i];
+                var d = 10 + iter.Elements[i].H * iter.Elements[i].H * Sigma.Evaluate(iter.Elements[i].MidPoint) / Mu.Evaluate(iter.Elements[i].MidPoint);
+                var e_h2 = (5.0 / 6) * m * (B * B / d);
                 errorsNorms[i] = Math.Sqrt(Math.Abs(e_h2));
                 eNormV2 += Math.Abs(e_h2);
 
-                double q = data.SolutionCenterDeriv[i];
-                //uNormV2_i
-                uNormV2 += data.Elements[i].H * q * q;
+                var q = iter.SolutionCenterDeriv[i];
+                uNormV2 += iter.Elements[i].H * q * q;
             }
 
-            data.SolutionNormV = uNormV2;
-            data.ErrorNormV = eNormV2;
-            data.ErrorsNormsV = errorsNorms;
+            iter.SolutionNormV = uNormV2;
+            iter.ErrorNormV = eNormV2;
+            iter.ErrorsNormsV = errorsNorms;
 
-            double sqrtN = Math.Sqrt(N);
-            double sqrtNorms = Math.Sqrt(uNormV2 + eNormV2);
+            var sqrtN = Math.Sqrt(n);
+            var sqrtNorms = Math.Sqrt(uNormV2 + eNormV2);
 
-            for (int i = 0; i < N; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 errors[i] = (errorsNorms[i] * sqrtN * 100) / sqrtNorms;
             }
-            data.Errors = errors;
+            iter.Errors = errors;
         }
 
         private Vector Solve(Matrix matrix, Vector vector)
