@@ -7,13 +7,11 @@ namespace AdaptiveFEM.Services
 {
     public class FEMSolver
     {
-        //Functions
         Function mu;
         Function beta;
         Function sigma;
         Function f;
 
-        //Constants
         double a;
         double b;
         double alpha;
@@ -23,10 +21,8 @@ namespace AdaptiveFEM.Services
         double error;
         int initialN;
 
-        //Result
-        List<Iteration> iterations;
+        public List<Iteration> Iterations { get; set; }
 
-        //Constructor with parameters
         public FEMSolver(Function mu, Function beta, Function sigma, Function f,
                              double a, double b, double alpha, double gamma, double u_a, double u_b, double error, int N)
         {
@@ -43,34 +39,81 @@ namespace AdaptiveFEM.Services
             this.error = error;
             this.initialN = N;
 
-            iterations = new List<Iteration>();
+            Iterations = new List<Iteration>();
         }
 
-        public List<Iteration> Iterations { get { return this.iterations; } }
-        public double A { get { return this.a; } }
-        public double B { get { return this.b; } }
-
-        public List<Element> InitialFiniteElements()
+        public void Solve()
         {
-            List<Element> e = new List<Element>();
-            double step = Math.Abs(b - a) / initialN;
-            double i = a;
-            while (i < b)
+            InitialIteration();
+            //Indexes of elements with the largest error
+            List<int> indexes = new List<int>();
+            int iterationNumber = 1;
+
+            do
             {
-                e.Add(new Element(i, Math.Round(i + step, 10), Math.Round(i + step / 2, 10), step));
-                i = Math.Round(i + step, 10);
+                indexes.Clear();
+                //Finding indexes of elements with error, larger then needed
+                for (int i = 0; i < Iterations[iterationNumber - 1].Elements.Count; ++i)
+                {
+                    if (Iterations[iterationNumber - 1].Errors[i] > error)
+                    {
+                        indexes.Add(i);
+                    }
+                }
+
+                if (indexes.Count != 0)
+                {
+                    //Divide elements with unappropriate error
+                    List<Element> elements = new List<Element>();
+                    for (int i = 0; i < Iterations[iterationNumber - 1].Elements.Count; ++i)
+                    {
+                        if (!indexes.Contains(i))
+                        {
+                            elements.Add(Iterations[iterationNumber - 1].Elements[i]);
+                        }
+                        else
+                        {
+                            Element e = Iterations[iterationNumber - 1].Elements[i];
+                            Element e1 = new Element(e.Begin, e.MidPoint, (e.Begin + e.MidPoint) / 2, e.MidPoint - e.Begin);
+                            Element e2 = new Element(e.MidPoint, e.End, (e.MidPoint + e.End) / 2, e.End - e.MidPoint);
+                            elements.Add(e1);
+                            elements.Add(e2);
+                        }
+                    }
+
+                    int N = elements.Count;
+                    Matrix matrix = GenereteMatrix(elements);
+                    Vector vector = GenereteVector(elements);
+                    Vector solution = Solve(matrix, vector);
+                    Vector solutionCenter = new DenseVector(N);
+                    Vector solutionCenterDeriv = new DenseVector(N);
+                    for (int i = 1; i < solution.Count; ++i)
+                    {
+                        solutionCenter[i - 1] = (solution[i] + solution[i - 1]) * 0.5;
+                        solutionCenterDeriv[i - 1] = (solution[i] - solution[i - 1]) / elements[i - 1].H;
+                    }
+
+                    Iteration data = new Iteration();
+                    data.Elements = elements;
+                    data.Solution = solution;
+                    data.SolutionCenter = solutionCenter;
+                    data.SolutionCenterDeriv = solutionCenterDeriv;
+                    CalculateErrors(ref data);
+                    Iterations.Add(data);
+                    ++iterationNumber;
+                }
             }
-            return e;
+            while (indexes.Count != 0);
         }
 
-        public void InitialIteration()
+        private void InitialIteration()
         {
             //Set elements
             List<Element> e = InitialFiniteElements();
 
             //Solve system
-            Matrix matrix = GetMatrix(e);
-            Vector vector = GetVector(e);
+            Matrix matrix = GenereteMatrix(e);
+            Vector vector = GenereteVector(e);
             Vector solution = Solve(matrix, vector);
 
             //Solution in midPoint
@@ -93,10 +136,23 @@ namespace AdaptiveFEM.Services
             CalculateErrors(ref data);
 
             //Save iteration data
-            iterations.Add(data);
+            Iterations.Add(data);
         }
 
-        public Matrix GetMatrix(List<Element> e)
+        private List<Element> InitialFiniteElements()
+        {
+            List<Element> e = new List<Element>();
+            double step = Math.Abs(b - a) / initialN;
+            double i = a;
+            while (i < b)
+            {
+                e.Add(new Element(i, Math.Round(i + step, 10), Math.Round(i + step / 2, 10), step));
+                i = Math.Round(i + step, 10);
+            }
+            return e;
+        }
+
+        private Matrix GenereteMatrix(List<Element> e)
         {
             int N = e.Count;
             //Matrix
@@ -117,7 +173,7 @@ namespace AdaptiveFEM.Services
             return matrix;
         }
 
-        public Vector GetVector(List<Element> e)
+        private Vector GenereteVector(List<Element> e)
         {
             int N = e.Count;
             //Vector
@@ -131,78 +187,7 @@ namespace AdaptiveFEM.Services
             return vector;
         }
 
-        public void Run()
-        {
-            //zero iteration
-            InitialIteration();
-
-            //Indexes of elements with the largest error
-            List<int> indexes = new List<int>();
-
-            //Setting iteration number
-            int iterationNumber = 1;
-
-
-            do
-            {
-                indexes.Clear();
-
-                //Finding indexes of elements with error, larger then needed
-                for (int i = 0; i < iterations[iterationNumber - 1].Elements.Count; ++i)
-                {
-                    if (iterations[iterationNumber - 1].Errors[i] > error)
-                    {
-                        indexes.Add(i);
-                    }
-                }
-
-                if (indexes.Count != 0)
-                {
-                    //Divide elements with unappropriate error
-                    List<Element> elements = new List<Element>();
-                    for (int i = 0; i < iterations[iterationNumber - 1].Elements.Count; ++i)
-                    {
-                        if (!indexes.Contains(i))
-                        {
-                            elements.Add(iterations[iterationNumber - 1].Elements[i]);
-                        }
-                        else
-                        {
-                            Element e = iterations[iterationNumber - 1].Elements[i];
-                            Element e1 = new Element(e.Begin, e.MidPoint, (e.Begin + e.MidPoint) / 2, e.MidPoint - e.Begin);
-                            Element e2 = new Element(e.MidPoint, e.End, (e.MidPoint + e.End) / 2, e.End - e.MidPoint);
-                            elements.Add(e1);
-                            elements.Add(e2);
-                        }
-                    }
-
-                    int N = elements.Count;
-                    Matrix matrix = GetMatrix(elements);
-                    Vector vector = GetVector(elements);
-                    Vector solution = Solve(matrix, vector);
-                    Vector solutionCenter = new DenseVector(N);
-                    Vector solutionCenterDeriv = new DenseVector(N);
-                    for (int i = 1; i < solution.Count; ++i)
-                    {
-                        solutionCenter[i - 1] = (solution[i] + solution[i - 1]) * 0.5;
-                        solutionCenterDeriv[i - 1] = (solution[i] - solution[i - 1]) / elements[i - 1].H;
-                    }
-
-                    Iteration data = new Iteration();
-                    data.Elements = elements;
-                    data.Solution = solution;
-                    data.SolutionCenter = solutionCenter;
-                    data.SolutionCenterDeriv = solutionCenterDeriv;
-                    CalculateErrors(ref data);
-                    iterations.Add(data);
-                    ++iterationNumber;
-                }
-            }
-            while (indexes.Count != 0);
-
-        }
-
-        public void CalculateErrors(ref Iteration data)
+        private void CalculateErrors(ref Iteration data)
         {
             int N = data.Elements.Count;
             Vector errors = new DenseVector(N);
@@ -242,11 +227,12 @@ namespace AdaptiveFEM.Services
             data.Errors = errors;
         }
 
-        public Vector Solve(Matrix matrix, Vector vector)
+        private Vector Solve(Matrix matrix, Vector vector)
         {
             if (matrix.ColumnCount != matrix.RowCount || matrix.ColumnCount != vector.Count)
             {
-                throw new Exception("Sizes of matrix and vector are not the same");
+                System.Windows.MessageBox.Show("Sizes of matrix and vector are not the same");
+                return null;
             }
 
             return (Vector)matrix.Solve(vector);

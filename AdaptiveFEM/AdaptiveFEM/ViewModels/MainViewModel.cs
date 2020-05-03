@@ -263,7 +263,7 @@ namespace AdaptiveFEM.ViewModels
             var f = new Function(F);
 
             Solver = new FEMSolver(mu, beta, sigma, f, A, B, Alpha, Gamma, Ua, Ub, Error, N);
-            Solver.Run();
+            Solver.Solve();
 
             IterationCount = Solver.Iterations.Count;
             CurrentIteration = Solver.Iterations.Count;
