@@ -224,9 +224,21 @@ namespace AdaptiveFEM.ViewModels
             }
         }
 
+        private string expectedFunction;
+        public string ExpectedFunction
+        {
+            get => expectedFunction;
+            set
+            {
+                expectedFunction = value;
+                OnPropertyChanged(nameof(ExpectedFunction));
+            }
+        }
+
         public ObservableCollection<Solution> NumResults { get; set; }
         public ICommand SolveCommand { get; private set; }
         public ICommand ClearCommand { get; private set; }
+        public ICommand DrawExpectedCommand { get; private set; }
 
         public MainViewModel()
         {
@@ -237,6 +249,7 @@ namespace AdaptiveFEM.ViewModels
 
             SolveCommand = new Command(Solve);
             ClearCommand = new Command(Clear);
+            DrawExpectedCommand = new Command(DrawExpected);
 
             Mu = "1";
             Beta = "100";
@@ -303,6 +316,28 @@ namespace AdaptiveFEM.ViewModels
                 Title = $"u{Subscript(CurrentIteration)}(x)",
                 Values = new ChartValues<ObservablePoint>(numList.Select(elem => new ObservablePoint(elem.X, elem.Ux))),
                 LineSmoothness = 0
+            });
+        }
+
+        private void DrawExpected(object parameter)
+        {
+            if(string.IsNullOrWhiteSpace(ExpectedFunction))
+            {
+                return;
+            }
+
+            var values = new ChartValues<ObservablePoint>();
+            Function func = new Function(ExpectedFunction);
+            for (double x = A; x <= B; x += 0.01)
+            {
+                values.Add(new ObservablePoint(x, func.Evaluate(x)));
+            }
+            SeriesCollection.Add(new LineSeries
+            {
+                Title = "Очікувана",
+                Values = values,
+                LineSmoothness = 0,
+                PointGeometry = null
             });
         }
 
