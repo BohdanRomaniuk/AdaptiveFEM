@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace AdaptiveFEM.ViewModels
 {
@@ -268,7 +269,7 @@ namespace AdaptiveFEM.ViewModels
         private void Solve(object parameter)
         {
             currentIteration = 0;
-            SeriesCollection.Clear();
+            //SeriesCollection.Clear();
 
             var mu = new Function(Mu);
             var beta = new Function(Beta);
@@ -328,15 +329,21 @@ namespace AdaptiveFEM.ViewModels
 
             var values = new ChartValues<ObservablePoint>();
             Function func = new Function(ExpectedFunction);
-            for (double x = A; x <= B; x += 0.01)
+            var step = 0.01;
+            var to = B + step;
+            for (double x = A; x <= to; x += step)
             {
                 values.Add(new ObservablePoint(x, func.Evaluate(x)));
             }
+            var fill = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+            fill.Opacity = 0.25;
             SeriesCollection.Add(new LineSeries
             {
                 Title = "Очікувана",
                 Values = values,
                 LineSmoothness = 0,
+                Stroke = Brushes.Red,
+                Fill = fill,
                 PointGeometry = null
             });
         }
