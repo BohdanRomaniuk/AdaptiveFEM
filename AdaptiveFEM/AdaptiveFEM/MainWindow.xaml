@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AdaptiveFEM"
         xmlns:converters="clr-namespace:AdaptiveFEM.Converters"
-        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:DVC="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         mc:Ignorable="d"
-        Title="Адаптивний метод скінченних елементів" Height="600" Width="800">
+        Title="AdaptiveFEM" Height="600" Width="800">
     <Window.Resources>
         <converters:ListItemIdConverter x:Key="ListItemIdConverter"/>
     </Window.Resources>
@@ -22,7 +22,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <GroupBox Header="Вхідні дані" Margin="3">
+            <GroupBox Header="Inputs" Margin="3">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -66,7 +66,7 @@
                     <TextBox Text="{Binding Ub, UpdateSourceTrigger=PropertyChanged}" Grid.Column="5" Grid.Row="3" Margin="3"/>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Інфо" Margin="3" Grid.Column="1">
+            <GroupBox Header="Iterations info" Margin="3" Grid.Column="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -82,17 +82,24 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Всього ітерацій:"/>
+                        <Label Content="Iterations:"/>
                         <Label FontWeight="Bold" Foreground="Green" Content="{Binding IterationCount}" Grid.Column="1"/>
-                        <Label Content="Поточна ітерація:" Grid.Row="1"/>
+                        <Label Content="Current itterations:" Grid.Row="1"/>
                         <Label FontWeight="Bold" Content="{Binding CurrentIteration}" Grid.Row="1" Grid.Column="1"/>
-                        <Label Content="Скінченних елементів:" Grid.Row="2"/>
+                        <Label Content="Elements:" Grid.Row="2"/>
                         <Label FontWeight="Bold" Content="{Binding ElementsCount}" Grid.Row="2" Grid.Column="1"/>
                     </Grid>
-                    <Slider Value="{Binding CurrentIteration}" Minimum="1" Maximum="{Binding IterationCount}" Grid.Row="1"/>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Current:" />
+                        <TextBox Text="{Binding CurrentIteration, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="3"/>
+                    </Grid>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Дії та очікуваний результат" Grid.Column="2" Margin="3">
+            <GroupBox Header="Functions" Grid.Column="2" Margin="3">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -100,24 +107,8 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Content="Обчислити" Command="{Binding SolveCommand}" Margin="3" />
-                        <Button Content="Очистити" Command="{Binding ClearCommand}" Margin="3" Grid.Column="1" />
-                    </Grid>
-                    <Label Content="Очікуваний результат:" Grid.Row="1" />
-                    <Grid Grid.Row="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Content="u(x)="/>
-                        <TextBox Text="{Binding ExpectedFunction}"  Margin="3" Grid.Column="1"/>
-                    </Grid>
-                    <Button Content="Очікуваний графік" Command="{Binding DrawExpectedCommand}" Grid.Row="3" Margin="3"/>
+                    <Button Content="Calculate" Command="{Binding SolveCommand}" Margin="3" />
+                    <Button Content="Clear everything" Command="{Binding ClearCommand}" Margin="3" Grid.Row="1" />
                 </Grid>
             </GroupBox>
         </Grid>
@@ -126,7 +117,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            <GroupBox Header="Значення" Margin="3,0,3,3">
+            <GroupBox Header="Values" Margin="3,0,3,3">
                 <Grid>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -160,15 +151,15 @@
                     </ListView>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Графік" Grid.Column="1" Margin="3,0,3,3">
-                <lvc:CartesianChart Series="{Binding SeriesCollection}" LegendLocation="Right" >
-                    <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="u(x)" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
-                    </lvc:CartesianChart.AxisY>
-                    <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="x" LabelFormatter="{Binding XFormatter}"></lvc:Axis>
-                    </lvc:CartesianChart.AxisX>
-                </lvc:CartesianChart>
+            <GroupBox Header="Graphics" Grid.Column="1" >
+                <DVC:Chart Name="graphicCntrl">
+                    <DVC:Chart.Series>
+                        <DVC:LineSeries ItemsSource="{Binding Dots}"  Title="u(x)"
+                                           IndependentValueBinding="{Binding Path=Key}"
+                                           DependentValueBinding="{Binding Path=Value}" Margin="0,0,0,0">
+                        </DVC:LineSeries>
+                    </DVC:Chart.Series>
+                </DVC:Chart>
             </GroupBox>
         </Grid>
     </Grid>

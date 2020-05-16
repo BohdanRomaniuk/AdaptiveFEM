@@ -178,7 +178,7 @@ namespace AdaptiveFEM.ViewModels
             get => currentIteration;
             set
             {
-                if (currentIteration != value && value != 0)
+                if (currentIteration != value && value != 0 && value <= IterationCount)
                 {
                     currentIteration = value;
                     if (Solver.Iterations?.Count != 0)
@@ -195,35 +195,15 @@ namespace AdaptiveFEM.ViewModels
         }
         #endregion
 
-        private SeriesCollection seriesCollection;
-        private Func<double, string> yFormatter;
-        private Func<double, string> xFormatter;
+        private ObservableCollection<KeyValuePair<double, double>> dots;
 
-        public SeriesCollection SeriesCollection
+        public ObservableCollection<KeyValuePair<double, double>> Dots
         {
-            get => seriesCollection;
+            get => dots;
             set
             {
-                seriesCollection = value;
+                dots = value;
                 OnPropertyChanged(nameof(SeriesCollection));
-            }
-        }
-        public Func<double, string> YFormatter
-        {
-            get => yFormatter;
-            set
-            {
-                yFormatter = value;
-                OnPropertyChanged(nameof(YFormatter));
-            }
-        }
-        public Func<double, string> XFormatter
-        {
-            get => xFormatter;
-            set
-            {
-                xFormatter = value;
-                OnPropertyChanged(nameof(XFormatter));
             }
         }
 
@@ -241,28 +221,24 @@ namespace AdaptiveFEM.ViewModels
         public ObservableCollection<Solution> NumResults { get; set; }
         public ICommand SolveCommand { get; private set; }
         public ICommand ClearCommand { get; private set; }
-        public ICommand DrawExpectedCommand { get; private set; }
 
         public MainViewModel()
         {
             NumResults = new ObservableCollection<Solution>();
-            SeriesCollection = new SeriesCollection();
-            YFormatter = value => $"{value:0.00}";
-            XFormatter = value => $"{value:0.00}";
+            Dots = new ObservableCollection<KeyValuePair<double, double>>();
 
             SolveCommand = new Command(Solve);
             ClearCommand = new Command(Clear);
-            DrawExpectedCommand = new Command(DrawExpected);
 
             Mu = "1.0";
-            Beta = "1500*Pow([X],8)";
-            Sigma = "80+2*Pow([X],2)";
-            F = "100*Exp(Pow([X]-0.15,7))*[X]";
+            Beta = "0.5*300*Pow([X],8)";
+            Sigma = "2*Pow([X],2)";
+            F = "10*Exp(Pow([X],14))";
             A = -1;
             B = 1;
             N = 4;
-            Alpha = 100000;
-            Gamma = 100000;
+            Alpha = Math.Pow(10,28);
+            Gamma = Math.Pow(10, 28);
             Error = 10;
             Ua = 0;
             Ub = 0;
@@ -271,7 +247,6 @@ namespace AdaptiveFEM.ViewModels
         private void Solve(object parameter)
         {
             currentIteration = 0;
-            //SeriesCollection.Clear();
 
             var mu = new Expression(Mu);
             var beta = new Expression(Beta);
@@ -288,7 +263,7 @@ namespace AdaptiveFEM.ViewModels
         private void Clear(object parameter)
         {
             currentIteration = 0;
-            SeriesCollection.Clear();
+            Dots.Clear();
             NumResults.Clear();
         }
 
@@ -314,40 +289,12 @@ namespace AdaptiveFEM.ViewModels
 
         private void DrawGraphic(List<Solution> numList)
         {
-            SeriesCollection.Add(new LineSeries
+            Dots.Clear();
+            foreach (var elem in numList)
             {
-                Title = $"u{Subscript(CurrentIteration)}(x)",
-                Values = new ChartValues<ObservablePoint>(numList.Select(elem => new ObservablePoint(elem.X, elem.Ux))),
-                LineSmoothness = 0
-            });
-        }
-
-        private void DrawExpected(object parameter)
-        {
-            if(string.IsNullOrWhiteSpace(ExpectedFunction))
-            {
-                return;
+                Dots.Add(new KeyValuePair<double, double>(elem.X, elem.Ux));
             }
-
-            var values = new ChartValues<ObservablePoint>();
-            var func = new Expression(ExpectedFunction);
-            var step = 0.01;
-            var to = B + step;
-            for (double x = A; x <= to; x += step)
-            {
-                values.Add(new ObservablePoint(x, func.Evaluate(x)));
-            }
-            var fill = new SolidColorBrush(Color.FromRgb(255, 0, 0));
-            fill.Opacity = 0.25;
-            SeriesCollection.Add(new LineSeries
-            {
-                Title = "Очікувана",
-                Values = values,
-                LineSmoothness = 0,
-                Stroke = Brushes.Red,
-                Fill = fill,
-                PointGeometry = null
-            });
+            OnPropertyChanged(nameof(Dots));
         }
 
         private string Subscript(int number)
