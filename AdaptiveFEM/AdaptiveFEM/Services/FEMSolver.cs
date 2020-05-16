@@ -3,15 +3,17 @@ using System;
 using System.Collections.Generic;
 using MathNet.Numerics.LinearAlgebra.Double;
 using AdaptiveFEM.Services.Interfaces;
+using NCalc;
+using AdaptiveFEM.Helpers;
 
 namespace AdaptiveFEM.Services
 {
     public class FEMSolver : IFEMSolver
     {
-        public Function Mu { get; set; }
-        public Function Beta { get; set; }
-        public Function Sigma { get; set; }
-        public Function F { get; set; }
+        public Expression Mu { get; set; }
+        public Expression Beta { get; set; }
+        public Expression Sigma { get; set; }
+        public Expression F { get; set; }
 
         public double A { get; set; }
         public double B { get; set; }
@@ -23,7 +25,7 @@ namespace AdaptiveFEM.Services
         public int InitialN { get; set; }
         public List<Iteration> Iterations { get; set; }
 
-        public FEMSolver(Function mu, Function beta, Function sigma, Function f, double a, double b, double alpha, double gamma, double ua, double ub, double error, int n)
+        public FEMSolver(Expression mu, Expression beta, Expression sigma, Expression f, double a, double b, double alpha, double gamma, double ua, double ub, double error, int n)
         {
             Iterations = new List<Iteration>();
             Mu = mu;

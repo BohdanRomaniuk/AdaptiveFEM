@@ -1,8 +1,10 @@
-﻿using AdaptiveFEM.Models;
+﻿using AdaptiveFEM.Helpers;
+using AdaptiveFEM.Models;
 using AdaptiveFEM.Services;
 using LiveCharts;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
+using NCalc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -252,11 +254,11 @@ namespace AdaptiveFEM.ViewModels
             ClearCommand = new Command(Clear);
             DrawExpectedCommand = new Command(DrawExpected);
 
-            Mu = "1";
-            Beta = "100";
-            Sigma = "0";
-            F = "100";
-            A = 0;
+            Mu = "1.0";
+            Beta = "1500*Pow([X],8)";
+            Sigma = "80+2*Pow([X],2)";
+            F = "100*Exp(Pow([X]-0.15,7))*[X]";
+            A = -1;
             B = 1;
             N = 4;
             Alpha = 100000;
@@ -271,10 +273,10 @@ namespace AdaptiveFEM.ViewModels
             currentIteration = 0;
             //SeriesCollection.Clear();
 
-            var mu = new Function(Mu);
-            var beta = new Function(Beta);
-            var sigma = new Function(Sigma);
-            var f = new Function(F);
+            var mu = new Expression(Mu);
+            var beta = new Expression(Beta);
+            var sigma = new Expression(Sigma);
+            var f = new Expression(F);
 
             Solver = new FEMSolver(mu, beta, sigma, f, A, B, Alpha, Gamma, Ua, Ub, Error, N);
             Solver.Solve();
@@ -328,7 +330,7 @@ namespace AdaptiveFEM.ViewModels
             }
 
             var values = new ChartValues<ObservablePoint>();
-            Function func = new Function(ExpectedFunction);
+            var func = new Expression(ExpectedFunction);
             var step = 0.01;
             var to = B + step;
             for (double x = A; x <= to; x += step)
