@@ -230,15 +230,15 @@ namespace AdaptiveFEM.ViewModels
             SolveCommand = new Command(Solve);
             ClearCommand = new Command(Clear);
 
-            Mu = "1.0";
-            Beta = "0.5*300*Pow([X],8)";
-            Sigma = "2*Pow([X],2)";
-            F = "10*Exp(Pow([X],14))";
+            Mu = "-1.0";
+            Beta = "1500*Pow([X],8)";
+            Sigma = "80*Pow([X],2)";
+            F = "100*Exp(Pow([X]-0.15,17))*[X]";
             A = -1;
             B = 1;
             N = 4;
-            Alpha = Math.Pow(10,28);
-            Gamma = Math.Pow(10, 28);
+            Alpha = 100000;
+            Gamma = 100000;
             Error = 10;
             Ua = 0;
             Ub = 0;

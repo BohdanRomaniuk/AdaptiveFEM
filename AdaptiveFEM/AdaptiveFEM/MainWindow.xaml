@@ -154,10 +154,10 @@
             <GroupBox Header="Graphics" Grid.Column="1" >
                 <DVC:Chart Name="graphicCntrl">
                     <DVC:Chart.Series>
-                        <DVC:LineSeries ItemsSource="{Binding Dots}"  Title="u(x)"
+                        <DVC:AreaSeries ItemsSource="{Binding Dots}"  Title="u(x)"
                                            IndependentValueBinding="{Binding Path=Key}"
-                                           DependentValueBinding="{Binding Path=Value}" Margin="0,0,0,0">
-                        </DVC:LineSeries>
+                                           DependentValueBinding="{Binding Path=Value}" Background="Green"  Margin="0,0,0,0">
+                        </DVC:AreaSeries>
                     </DVC:Chart.Series>
                 </DVC:Chart>
             </GroupBox>
