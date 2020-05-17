@@ -195,8 +195,8 @@
                             </ListView.Resources>
                             <ListView.View>
                                 <GridView>
-                                    <GridViewColumn Header="xc" Width="{Binding ElementName=w1, Path=ActualWidth}" DisplayMemberBinding="{Binding XCenter}" />
-                                    <GridViewColumn Header="u(x)c" Width="{Binding ElementName=w2, Path=ActualWidth}" DisplayMemberBinding="{Binding UxCenter}" />
+                                    <GridViewColumn Header="xᶜ" Width="{Binding ElementName=w1, Path=ActualWidth}" DisplayMemberBinding="{Binding XCenter}" />
+                                    <GridViewColumn Header="u(x)ᶜ" Width="{Binding ElementName=w2, Path=ActualWidth}" DisplayMemberBinding="{Binding UxCenter}" />
                                     <GridViewColumn Header="u'(x)" Width="{Binding ElementName=w3, Path=ActualWidth}" DisplayMemberBinding="{Binding UxDeriv}" />
                                     <GridViewColumn Header="ErrorNorm" Width="{Binding ElementName=w4, Path=ActualWidth}" DisplayMemberBinding="{Binding ErrorNorm}" />
                                     <GridViewColumn Header="RelError" Width="{Binding ElementName=w5, Path=ActualWidth}" DisplayMemberBinding="{Binding RelError}" />
