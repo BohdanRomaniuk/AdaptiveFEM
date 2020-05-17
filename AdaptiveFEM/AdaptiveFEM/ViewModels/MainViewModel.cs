@@ -186,8 +186,8 @@ namespace AdaptiveFEM.ViewModels
                         var lastIter = Solver.Iterations[currentIteration - 1];
                         ElementsCount = lastIter.Elements.Count;
                         var result = PopulateResult(lastIter);
-                        ShowTable(result);
-                        DrawGraphic(result);
+                        ShowTable(result.Item1, result.Item2);
+                        DrawGraphic(result.Item1);
                     }
                     OnPropertyChanged(nameof(CurrentIteration));
                 }
@@ -239,6 +239,7 @@ namespace AdaptiveFEM.ViewModels
         }
 
         public ObservableCollection<Solution> NumResults { get; set; }
+        public ObservableCollection<Error> ErrorResults { get; set; }
         public ICommand SolveCommand { get; private set; }
         public ICommand ClearCommand { get; private set; }
         public ICommand DrawExpectedCommand { get; private set; }
@@ -246,6 +247,7 @@ namespace AdaptiveFEM.ViewModels
         public MainViewModel()
         {
             NumResults = new ObservableCollection<Solution>();
+            ErrorResults = new ObservableCollection<Error>();
             SeriesCollection = new SeriesCollection();
             YFormatter = value => $"{value:0.00}";
             XFormatter = value => $"{value:0.00}";
@@ -292,23 +294,36 @@ namespace AdaptiveFEM.ViewModels
             NumResults.Clear();
         }
 
-        private List<Solution> PopulateResult(Iteration data)
+        private (List<Solution>, List<Error>) PopulateResult(Iteration data)
         {
-            var result = new List<Solution>();
+            var nums = new List<Solution>();
             for (int i = 0; i < data.Elements.Count; ++i)
             {
-                result.Add(new Solution(data.Elements[i].Begin, data.Solution[i]));
+                nums.Add(new Solution(data.Elements[i].Begin, data.Solution[i]));
             }
-            result.Add(new Solution(data.Elements[data.Elements.Count - 1].End, data.Solution[data.Elements.Count]));
-            return result;
+            nums.Add(new Solution(data.Elements[data.Elements.Count - 1].End, data.Solution[data.Elements.Count]));
+
+            var errors = new List<Error>();
+            for (int i = 0; i < data.Elements.Count; ++i)
+            {
+                errors.Add(new Error(data.Elements[i].MidPoint, data.SolutionCenter[i], data.SolutionCenterDeriv[i], data.ErrorsNormsV[i], data.Errors[i]));
+            }
+
+            return (nums, errors);
         }
 
-        private void ShowTable(List<Solution> numList)
+        private void ShowTable(List<Solution> numList, List<Error> errList)
         {
             NumResults.Clear();
             foreach (var num in numList)
             {
                 NumResults.Add(num);
+            }
+
+            ErrorResults.Clear();
+            foreach (var num in errList)
+            {
+                ErrorResults.Add(num);
             }
         }
 
@@ -318,7 +333,8 @@ namespace AdaptiveFEM.ViewModels
             {
                 Title = $"u{Subscript(CurrentIteration)}(x)",
                 Values = new ChartValues<ObservablePoint>(numList.Select(elem => new ObservablePoint(elem.X, elem.Ux))),
-                LineSmoothness = 0
+                LineSmoothness = 0,
+                AreaLimit = 0
             });
         }
 
