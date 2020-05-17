@@ -1,13 +1,16 @@
-﻿using AdaptiveFEM.Models;
+﻿using AdaptiveFEM.Helpers;
+using AdaptiveFEM.Models;
 using AdaptiveFEM.Services;
 using LiveCharts;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
+using NCalc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace AdaptiveFEM.ViewModels
 {
@@ -224,9 +227,21 @@ namespace AdaptiveFEM.ViewModels
             }
         }
 
+        private string expectedFunction;
+        public string ExpectedFunction
+        {
+            get => expectedFunction;
+            set
+            {
+                expectedFunction = value;
+                OnPropertyChanged(nameof(ExpectedFunction));
+            }
+        }
+
         public ObservableCollection<Solution> NumResults { get; set; }
         public ICommand SolveCommand { get; private set; }
         public ICommand ClearCommand { get; private set; }
+        public ICommand DrawExpectedCommand { get; private set; }
 
         public MainViewModel()
         {
@@ -237,12 +252,13 @@ namespace AdaptiveFEM.ViewModels
 
             SolveCommand = new Command(Solve);
             ClearCommand = new Command(Clear);
+            DrawExpectedCommand = new Command(DrawExpected);
 
-            Mu = "1";
-            Beta = "100";
-            Sigma = "0";
-            F = "100";
-            A = 0;
+            Mu = "1.0";
+            Beta = "1500*Pow([X],8)";
+            Sigma = "80+2*Pow([X],2)";
+            F = "100*Exp(Pow([X]-0.15,7))*[X]";
+            A = -1;
             B = 1;
             N = 4;
             Alpha = 100000;
@@ -255,15 +271,15 @@ namespace AdaptiveFEM.ViewModels
         private void Solve(object parameter)
         {
             currentIteration = 0;
-            SeriesCollection.Clear();
+            //SeriesCollection.Clear();
 
-            var mu = new Function(Mu);
-            var beta = new Function(Beta);
-            var sigma = new Function(Sigma);
-            var f = new Function(F);
+            var mu = new Expression(Mu);
+            var beta = new Expression(Beta);
+            var sigma = new Expression(Sigma);
+            var f = new Expression(F);
 
             Solver = new FEMSolver(mu, beta, sigma, f, A, B, Alpha, Gamma, Ua, Ub, Error, N);
-            Solver.Run();
+            Solver.Solve();
 
             IterationCount = Solver.Iterations.Count;
             CurrentIteration = Solver.Iterations.Count;
@@ -303,6 +319,34 @@ namespace AdaptiveFEM.ViewModels
                 Title = $"u{Subscript(CurrentIteration)}(x)",
                 Values = new ChartValues<ObservablePoint>(numList.Select(elem => new ObservablePoint(elem.X, elem.Ux))),
                 LineSmoothness = 0
+            });
+        }
+
+        private void DrawExpected(object parameter)
+        {
+            if(string.IsNullOrWhiteSpace(ExpectedFunction))
+            {
+                return;
+            }
+
+            var values = new ChartValues<ObservablePoint>();
+            var func = new Expression(ExpectedFunction);
+            var step = 0.01;
+            var to = B + step;
+            for (double x = A; x <= to; x += step)
+            {
+                values.Add(new ObservablePoint(x, func.Evaluate(x)));
+            }
+            var fill = new SolidColorBrush(Color.FromRgb(255, 0, 0));
+            fill.Opacity = 0.25;
+            SeriesCollection.Add(new LineSeries
+            {
+                Title = "Очікувана",
+                Values = values,
+                LineSmoothness = 0,
+                Stroke = Brushes.Red,
+                Fill = fill,
+                PointGeometry = null
             });
         }
 

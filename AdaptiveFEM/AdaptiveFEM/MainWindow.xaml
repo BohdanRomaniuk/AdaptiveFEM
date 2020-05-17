@@ -115,9 +115,9 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Label Content="u(x)="/>
-                        <TextBox Text=""  Margin="3" Grid.Column="1"/>
+                        <TextBox Text="{Binding ExpectedFunction}"  Margin="3" Grid.Column="1"/>
                     </Grid>
-                    <Button Content="Очікуваний графік" Grid.Row="3" Margin="3"/>
+                    <Button Content="Очікуваний графік" Command="{Binding DrawExpectedCommand}" Grid.Row="3" Margin="3"/>
                 </Grid>
             </GroupBox>
         </Grid>
