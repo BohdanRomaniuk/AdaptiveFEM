@@ -292,6 +292,7 @@ namespace AdaptiveFEM.ViewModels
             currentIteration = 0;
             SeriesCollection.Clear();
             NumResults.Clear();
+            ErrorResults.Clear();
         }
 
         private (List<Solution>, List<Error>) PopulateResult(Iteration data)
