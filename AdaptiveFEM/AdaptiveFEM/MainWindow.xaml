@@ -128,8 +128,8 @@
             </Grid.ColumnDefinitions>
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="3*"/>
                 </Grid.RowDefinitions>
                 <GroupBox Header="Значення" Margin="3,0,3,3">
                     <Grid>
@@ -167,42 +167,60 @@
                 </GroupBox>
                 <GroupBox Header="Похибки" Margin="3,0,3,3" Grid.Row="1">
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
-                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
-                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
-                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
-                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Name="w1"></Border>
-                            <Border Grid.Column="1" Name="w2"></Border>
-                            <Border Grid.Column="2" Name="w3"></Border>
-                            <Border Grid.Column="3" Name="w4"></Border>
-                            <Border Grid.Column="4" Name="w5"></Border>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="0.15*"></ColumnDefinition>
+                                    <ColumnDefinition Width="0.25*"></ColumnDefinition>
+                                    <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                    <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                    <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Name="w1"></Border>
+                                <Border Grid.Column="1" Name="w2"></Border>
+                                <Border Grid.Column="2" Name="w3"></Border>
+                                <Border Grid.Column="3" Name="w4"></Border>
+                                <Border Grid.Column="4" Name="w5"></Border>
+                            </Grid>
+                            <ListView x:Name="nums1" HorizontalAlignment="Left" Margin="3" ItemsSource="{Binding Path=ErrorResults, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="trimmed">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Height" Value="18" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                        <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text }" />
+                                    </Style>
+                                </ListView.Resources>
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="#" Width="{Binding ElementName=w1, Path=ActualWidth}" DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}} , Converter={StaticResource ListItemIdConverter}}" />
+                                        <GridViewColumn Header="xᶜ" Width="{Binding ElementName=w2, Path=ActualWidth}" DisplayMemberBinding="{Binding XCenter}" />
+                                        <GridViewColumn Header="u(x)ᶜ" Width="{Binding ElementName=w3, Path=ActualWidth}" DisplayMemberBinding="{Binding UxCenter}" />
+                                        <GridViewColumn Header="||e||i+0.5" Width="{Binding ElementName=w4, Path=ActualWidth}" DisplayMemberBinding="{Binding ENormI}" />
+                                        <GridViewColumn Header="ηi+0.5" Width="{Binding ElementName=w5, Path=ActualWidth}" DisplayMemberBinding="{Binding EthaError}" />
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
                         </Grid>
-                        <ListView x:Name="nums1" HorizontalAlignment="Left" Margin="3" ItemsSource="{Binding Path=ErrorResults, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="trimmed">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="Height" Value="18" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.Resources>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-                                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text }" />
-                                </Style>
-                            </ListView.Resources>
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="xᶜ" Width="{Binding ElementName=w1, Path=ActualWidth}" DisplayMemberBinding="{Binding XCenter}" />
-                                    <GridViewColumn Header="u(x)ᶜ" Width="{Binding ElementName=w2, Path=ActualWidth}" DisplayMemberBinding="{Binding UxCenter}" />
-                                    <GridViewColumn Header="u'(x)" Width="{Binding ElementName=w3, Path=ActualWidth}" DisplayMemberBinding="{Binding UxDeriv}" />
-                                    <GridViewColumn Header="ErrorNorm" Width="{Binding ElementName=w4, Path=ActualWidth}" DisplayMemberBinding="{Binding ErrorNorm}" />
-                                    <GridViewColumn Header="RelError" Width="{Binding ElementName=w5, Path=ActualWidth}" DisplayMemberBinding="{Binding RelError}" />
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="||u||V="/>
+                            <Label Content="{Binding UNorm}" Grid.Column="1"/>
+                            <Label Content="||e||V=" Grid.Column="2"/>
+                            <Label Content="{Binding ENorm}" Grid.Column="3"/>
+                        </Grid>
                     </Grid>
                 </GroupBox>
             </Grid>
