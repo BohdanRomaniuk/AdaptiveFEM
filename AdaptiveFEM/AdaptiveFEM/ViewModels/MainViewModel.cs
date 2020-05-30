@@ -145,6 +145,26 @@ namespace AdaptiveFEM.ViewModels
                 OnPropertyChanged(nameof(N));
             }
         }
+        private double unorm;
+        public double UNorm
+        {
+            get => unorm;
+            set
+            {
+                unorm = value;
+                OnPropertyChanged(nameof(UNorm));
+            }
+        }
+        private double enorm;
+        public double ENorm
+        {
+            get => enorm;
+            set
+            {
+                enorm = value;
+                OnPropertyChanged(nameof(ENorm));
+            }
+        }
 
         public FEMSolver Solver
         {
@@ -284,7 +304,8 @@ namespace AdaptiveFEM.ViewModels
             {
                 errors.Add(new Error(data.Elements[i].MidPoint, data.SolutionCenter[i], data.SolutionCenterDeriv[i], data.ErrorsNormsV[i], data.Errors[i]));
             }
-
+            UNorm = data.SolutionNormV;
+            ENorm = data.ErrorNormV;
             return (nums, errors);
         }
 
