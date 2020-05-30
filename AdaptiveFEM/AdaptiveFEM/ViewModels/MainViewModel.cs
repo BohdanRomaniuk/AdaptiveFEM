@@ -282,10 +282,10 @@ namespace AdaptiveFEM.ViewModels
             F = "100*Exp(Pow([X]-0.15,7))*[X]";
             A = -1;
             B = 1;
-            N = 4;
+            N = 10;
             Alpha = 100000;
             Gamma = 100000;
-            Error = 10;
+            Error = 5;
             Ua = 0;
             Ub = 0;
         }
