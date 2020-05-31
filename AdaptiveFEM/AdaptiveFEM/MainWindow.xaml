@@ -260,8 +260,8 @@
                                 <GridView>
                                     <GridViewColumn Header="Ітерація" Width="{Binding ElementName=a1, Path=ActualWidth}" DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}} , Converter={StaticResource ListItemIdConverter}}" />
                                     <GridViewColumn Header="N" Width="{Binding ElementName=a2, Path=ActualWidth}" DisplayMemberBinding="{Binding N}" />
-                                    <GridViewColumn Header="Енергетична норма оцінювача" Width="{Binding ElementName=a3, Path=ActualWidth}" DisplayMemberBinding="{Binding eNv}" />
-                                    <GridViewColumn Header="Енергетична норма розвязку" Width="{Binding ElementName=a4, Path=ActualWidth}" DisplayMemberBinding="{Binding uNv}" />
+                                    <GridViewColumn Header="Енергетична норма оцінювача" Width="{Binding ElementName=a3, Path=ActualWidth}" DisplayMemberBinding="{Binding ENorm}" />
+                                    <GridViewColumn Header="Енергетична норма розвязку" Width="{Binding ElementName=a4, Path=ActualWidth}" DisplayMemberBinding="{Binding UNorm}" />
                                     <GridViewColumn Header="Порядок збіжності" Width="{Binding ElementName=a5, Path=ActualWidth}" DisplayMemberBinding="{Binding OrderOfConvergence}" />
                                     <GridViewColumn Header="Max відносна похиб." Width="{Binding ElementName=a6, Path=ActualWidth}" DisplayMemberBinding="{Binding MaxRelativeError}" />
                                     <GridViewColumn Header="Глобальна похиб." Width="{Binding ElementName=a7, Path=ActualWidth}" DisplayMemberBinding="{Binding GlobalError}" />

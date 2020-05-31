@@ -313,6 +313,7 @@ namespace AdaptiveFEM.ViewModels
             SeriesCollection.Clear();
             NumResults.Clear();
             ErrorResults.Clear();
+            //Solver.Iterations.Clear();
         }
 
         private (List<Solution>, List<Error>) PopulateResult(Iteration data)
@@ -329,8 +330,8 @@ namespace AdaptiveFEM.ViewModels
             {
                 errors.Add(new Error(data.Elements[i].MidPoint, data.SolutionCenter[i], data.SolutionCenterDeriv[i], data.ErrorsNormsV[i], data.Errors[i]));
             }
-            UNorm = data.SolutionNormV;
-            ENorm = data.ErrorNormV;
+            UNorm = data.UNorm;
+            ENorm = data.ENorm;
             return (nums, errors);
         }
 
