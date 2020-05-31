@@ -195,6 +195,8 @@ namespace AdaptiveFEM.Services
                 var e_h2 = (5.0 / 6) * m * (B * B / d);
                 errorsNorms[i] = Math.Sqrt(Math.Abs(e_h2));
                 eNormV2 += Math.Abs(e_h2);
+                //var qa = iter.SolutionCenter[i];
+                //eNormV2 += iter.Elements[i].H * qa * qa;
 
                 var q = iter.SolutionCenterDeriv[i];
                 uNormV2 += iter.Elements[i].H * q * q;
