@@ -282,10 +282,10 @@ namespace AdaptiveFEM.ViewModels
             F = "100*Exp(Pow([X]-0.15,7))*[X]";
             A = -1;
             B = 1;
-            N = 4;
+            N = 10;
             Alpha = 100000;
             Gamma = 100000;
-            Error = 10;
+            Error = 5;
             Ua = 0;
             Ub = 0;
         }
@@ -313,6 +313,7 @@ namespace AdaptiveFEM.ViewModels
             SeriesCollection.Clear();
             NumResults.Clear();
             ErrorResults.Clear();
+            //Solver.Iterations.Clear();
         }
 
         private (List<Solution>, List<Error>) PopulateResult(Iteration data)
@@ -329,8 +330,8 @@ namespace AdaptiveFEM.ViewModels
             {
                 errors.Add(new Error(data.Elements[i].MidPoint, data.SolutionCenter[i], data.SolutionCenterDeriv[i], data.ErrorsNormsV[i], data.Errors[i]));
             }
-            UNorm = data.SolutionNormV;
-            ENorm = data.ErrorNormV;
+            UNorm = data.UNorm;
+            ENorm = data.ENorm;
             return (nums, errors);
         }
 

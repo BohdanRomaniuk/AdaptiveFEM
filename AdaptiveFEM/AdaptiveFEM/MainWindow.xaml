@@ -129,6 +129,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="2*"/>
+                    <RowDefinition Height="2*"/>
                     <RowDefinition Height="3*"/>
                 </Grid.RowDefinitions>
                 <GroupBox Header="Значення" Margin="3,0,3,3">
@@ -165,7 +166,7 @@
                         </ListView>
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="Похибки" Margin="3,0,3,3" Grid.Row="1">
+                <GroupBox Header="Ітерація" Margin="3,0,3,3" Grid.Row="1">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -221,6 +222,52 @@
                             <Label Content="||e||V=" Grid.Column="2"/>
                             <Label Content="{Binding ENorm}" Grid.Column="3"/>
                         </Grid>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Похибки" Margin="3,0,3,3" Grid.Row="2">
+                    <Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.15*"></ColumnDefinition>
+                                <ColumnDefinition Width="0.15*"></ColumnDefinition>
+                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                                <ColumnDefinition Width="0.4*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Name="a1"></Border>
+                            <Border Grid.Column="1" Name="a2"></Border>
+                            <Border Grid.Column="2" Name="a3"></Border>
+                            <Border Grid.Column="3" Name="a4"></Border>
+                            <Border Grid.Column="4" Name="a5"></Border>
+                            <Border Grid.Column="5" Name="a6"></Border>
+                            <Border Grid.Column="6" Name="a7"></Border>
+                        </Grid>
+                        <ListView x:Name="nums2" HorizontalAlignment="Left" Margin="3" ItemsSource="{Binding Path=Solver.Iterations, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="trimmed">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="Height" Value="18" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text }" />
+                                </Style>
+                            </ListView.Resources>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Ітерація" Width="{Binding ElementName=a1, Path=ActualWidth}" DisplayMemberBinding="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}} , Converter={StaticResource ListItemIdConverter}}" />
+                                    <GridViewColumn Header="N" Width="{Binding ElementName=a2, Path=ActualWidth}" DisplayMemberBinding="{Binding N}" />
+                                    <GridViewColumn Header="Енергетична норма оцінювача" Width="{Binding ElementName=a3, Path=ActualWidth}" DisplayMemberBinding="{Binding ENorm}" />
+                                    <GridViewColumn Header="Енергетична норма розвязку" Width="{Binding ElementName=a4, Path=ActualWidth}" DisplayMemberBinding="{Binding UNorm}" />
+                                    <GridViewColumn Header="Порядок збіжності" Width="{Binding ElementName=a5, Path=ActualWidth}" DisplayMemberBinding="{Binding OrderOfConvergence}" />
+                                    <GridViewColumn Header="Max відносна похиб." Width="{Binding ElementName=a6, Path=ActualWidth}" DisplayMemberBinding="{Binding MaxRelativeError}" />
+                                    <GridViewColumn Header="Глобальна похиб." Width="{Binding ElementName=a7, Path=ActualWidth}" DisplayMemberBinding="{Binding GlobalError}" />
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
                     </Grid>
                 </GroupBox>
             </Grid>

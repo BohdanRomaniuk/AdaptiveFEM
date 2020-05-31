@@ -24,6 +24,7 @@ namespace AdaptiveFEM.Services
         public double Error { get; set; }
         public int InitialN { get; set; }
         public List<Iteration> Iterations { get; set; }
+        private double startEn = 0.0;
 
         public FEMSolver(Expression mu, Expression beta, Expression sigma, Expression f, double a, double b, double alpha, double gamma, double ua, double ub, double error, int n)
         {
@@ -187,29 +188,37 @@ namespace AdaptiveFEM.Services
             var uNormV2 = 0.0;
             for (int i = 0; i < n; ++i)
             {
-                var m = iter.Elements[i].H * iter.Elements[i].H * iter.Elements[i].H / Mu.Evaluate(iter.Elements[i].MidPoint);
-                var B = F.Evaluate(iter.Elements[i].MidPoint) - Beta.Evaluate(iter.Elements[i].MidPoint) * iter.SolutionCenterDeriv[i] - Sigma.Evaluate(iter.Elements[i].MidPoint) * iter.SolutionCenter[i];
-                var d = 10 + iter.Elements[i].H * iter.Elements[i].H * Sigma.Evaluate(iter.Elements[i].MidPoint) / Mu.Evaluate(iter.Elements[i].MidPoint);
-                var e_h2 = (5.0 / 6) * m * (B * B / d);
+                var m = Math.Pow(iter.Elements[i].H, 3) / Mu.Evaluate(iter.Elements[i].MidPoint);
+                var b = F.Evaluate(iter.Elements[i].MidPoint) - (Beta.Evaluate(iter.Elements[i].MidPoint) * iter.SolutionCenterDeriv[i]) - (Sigma.Evaluate(iter.Elements[i].MidPoint) * iter.SolutionCenter[i]);
+                var d = 10 + ((iter.Elements[i].H * Beta.Evaluate(iter.Elements[i].MidPoint)) / Mu.Evaluate(iter.Elements[i].MidPoint) * ((iter.Elements[i].H * iter.Elements[i].H * Sigma.Evaluate(iter.Elements[i].MidPoint)) / Mu.Evaluate(iter.Elements[i].MidPoint)));
+                var e_h2 = (5.0 / 6) * m * (b * b / d);
                 errorsNorms[i] = Math.Sqrt(Math.Abs(e_h2));
                 eNormV2 += Math.Abs(e_h2);
 
                 var q = iter.SolutionCenterDeriv[i];
                 uNormV2 += iter.Elements[i].H * q * q;
-            }
+            }    
 
-            iter.SolutionNormV = uNormV2;
-            iter.ErrorNormV = eNormV2;
+            iter.UNormV2 = uNormV2;
+            iter.ENormV2 = eNormV2;
             iter.ErrorsNormsV = errorsNorms;
 
-            var sqrtN = Math.Sqrt(n);
-            var sqrtNorms = Math.Sqrt(uNormV2 + eNormV2);
+            //iter.UNorm = Math.Sqrt(uNormV2);
+            iter.UNorm = Math.Sqrt(iter.Solution * GenereteMatrix(iter.Elements) * iter.Solution);
+            iter.ENorm = Math.Sqrt(eNormV2);
 
             for (int i = 0; i < n; ++i)
             {
-                errors[i] = (errorsNorms[i] * sqrtN * 100) / sqrtNorms;
+                errors[i] = (errorsNorms[i] * Math.Sqrt(n) * 100) / Math.Sqrt(uNormV2 + eNormV2);
             }
             iter.Errors = errors;
+            if(iter.N == InitialN)
+            {
+                startEn = iter.ENorm;
+            }
+
+            iter.OrderOfConvergence = (iter.N != InitialN) ? (Math.Log(startEn) - Math.Log(iter.ENorm)) / (Math.Log(iter.N) - Math.Log(InitialN)) : 0;
+            iter.MaxRelativeError = iter.Errors.Maximum();
         }
 
         private Vector Solve(Matrix matrix, Vector vector)
