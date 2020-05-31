@@ -7,7 +7,7 @@ namespace AdaptiveFEM.Models
     {
         public List<Element> Elements { get; set; }
 
-        public int N => Elements?.Count ?? 0;
+        public int N { get; set; }
 
         public Vector SolutionCenter { get; set; }
 

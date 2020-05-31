@@ -244,7 +244,7 @@
                             <Border Grid.Column="5" Name="a6"></Border>
                             <Border Grid.Column="6" Name="a7"></Border>
                         </Grid>
-                        <ListView x:Name="nums2" HorizontalAlignment="Left" Margin="3" ItemsSource="{Binding Path=Solver.Iterations, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="trimmed">
+                        <ListView x:Name="nums2" HorizontalAlignment="Left" Margin="3" ItemsSource="{Binding Path=Iterations, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="trimmed">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="Height" Value="18" />

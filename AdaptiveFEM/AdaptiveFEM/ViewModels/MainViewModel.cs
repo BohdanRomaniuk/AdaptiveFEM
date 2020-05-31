@@ -31,7 +31,6 @@ namespace AdaptiveFEM.ViewModels
         private double error;
         private int n;
 
-        private FEMSolver solver;
         private int iterationCount;
         private int elementsCount;
         private int currentIteration;
@@ -166,15 +165,6 @@ namespace AdaptiveFEM.ViewModels
             }
         }
 
-        public FEMSolver Solver
-        {
-            get => solver;
-            set
-            {
-                solver = value;
-                OnPropertyChanged(nameof(Solver));
-            }
-        }
         public int IterationCount
         {
             get => iterationCount;
@@ -201,19 +191,27 @@ namespace AdaptiveFEM.ViewModels
                 if (currentIteration != value && value != 0)
                 {
                     currentIteration = value;
-                    if (Solver.Iterations?.Count != 0)
-                    {
-                        var lastIter = Solver.Iterations[currentIteration - 1];
-                        ElementsCount = lastIter.Elements.Count;
-                        var result = PopulateResult(lastIter);
-                        ShowTable(result.Item1, result.Item2);
-                        DrawGraphic(result.Item1);
-                    }
+                    //if (Solver.Iterations?.Count != 0)
+                    //{
+                    //    var lastIter = Solver.Iterations[currentIteration - 1];
+                    //    ElementsCount = lastIter.Elements.Count;
+                    //    var result = PopulateResult(lastIter);
+                    //    ShowTable(result.Item1, result.Item2);
+                    //    DrawGraphic(result.Item1);
+                    //}
                     OnPropertyChanged(nameof(CurrentIteration));
                 }
             }
         }
+
+
+        public Expression MuFunc => new Expression(Mu);
+        public Expression BetaFunc => new Expression(Beta);
+        public Expression SigmaFunc => new Expression(Sigma);
+        public Expression FFunc => new Expression(F);
         #endregion
+
+        public ObservableCollection<Iteration> Iterations { get; set; }
 
         private SeriesCollection seriesCollection;
         private Func<double, string> yFormatter;
@@ -268,6 +266,7 @@ namespace AdaptiveFEM.ViewModels
         {
             NumResults = new ObservableCollection<Solution>();
             ErrorResults = new ObservableCollection<Error>();
+            Iterations = new ObservableCollection<Iteration>();
             SeriesCollection = new SeriesCollection();
             YFormatter = value => $"{value:0.00}";
             XFormatter = value => $"{value:0.00}";
@@ -288,23 +287,36 @@ namespace AdaptiveFEM.ViewModels
             Error = 5;
             Ua = 0;
             Ub = 0;
+
+            linear = new LinealAproksimation(N);
         }
+
+        LinealAproksimation linear;
 
         private void Solve(object parameter)
         {
-            currentIteration = 0;
-            //SeriesCollection.Clear();
+            do
+            {
+                linear.nextstep();
 
-            var mu = new Expression(Mu);
-            var beta = new Expression(Beta);
-            var sigma = new Expression(Sigma);
-            var f = new Expression(F);
+                var f = linear.getNorms();
+                var s = linear.getVars();
 
-            Solver = new FEMSolver(mu, beta, sigma, f, A, B, Alpha, Gamma, Ua, Ub, Error, N);
-            Solver.Solve();
+                var iter = new Iteration();
+                iter.N = linear.prevN;
+                iter.eNv = f.Item1;
+                iter.uNv = f.Item2;
+                iter.OrderOfConvergence = s.Item1;
+                iter.MaxRelativeError = s.Item2;
+                Iterations.Add(iter);
+                var ceh = linear.getAllCeh();
+                if (iter.MaxRelativeError < Error)
+                {
+                    break;
+                }
+            } while (true);
 
-            IterationCount = Solver.Iterations.Count;
-            CurrentIteration = Solver.Iterations.Count;
+            DrawGraphic(linear.getXi(), linear.getQ());
         }
 
         private void Clear(object parameter)
@@ -349,12 +361,17 @@ namespace AdaptiveFEM.ViewModels
             }
         }
 
-        private void DrawGraphic(List<Solution> numList)
+        private void DrawGraphic(double[] xi, double[] yi)
         {
+            var lst = new List<ObservablePoint>();
+            for (int i = 0; i < xi.Length; ++i)
+            {
+                lst.Add(new ObservablePoint(xi[i], yi[i]));
+            }
             SeriesCollection.Add(new LineSeries
             {
                 Title = $"u{Subscript(CurrentIteration)}(x)",
-                Values = new ChartValues<ObservablePoint>(numList.Select(elem => new ObservablePoint(elem.X, elem.Ux))),
+                Values = new ChartValues<ObservablePoint>(lst),
                 LineSmoothness = 0,
                 AreaLimit = 0
             });
@@ -362,7 +379,7 @@ namespace AdaptiveFEM.ViewModels
 
         private void DrawExpected(object parameter)
         {
-            if(string.IsNullOrWhiteSpace(ExpectedFunction))
+            if (string.IsNullOrWhiteSpace(ExpectedFunction))
             {
                 return;
             }
